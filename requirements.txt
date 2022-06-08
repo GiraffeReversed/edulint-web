@@ -1,0 +1,8 @@
+flake8
+flake8-json
+pylint
+flask
+flask-talisman
+gunicorn
+gevent
+markdown
