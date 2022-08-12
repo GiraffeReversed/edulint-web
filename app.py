@@ -1,4 +1,5 @@
 from flask import Flask, render_template, redirect, request, flash, send_from_directory, send_file, jsonify
+from edulint.config.config import get_config
 from edulint.linting.linting import lint
 from edulint.linting.problem import ProblemEncoder
 from edulint.explanations import get_explanations
@@ -72,7 +73,8 @@ def analyze(code_hash: str):
         with open(problems_path(code_hash), encoding="utf8") as f:
             return f.read()
 
-    result = lint(code_path(code_hash))
+    config = get_config(code_path(code_hash))
+    result = lint(code_path(code_hash), config)
     with open(problems_path(code_hash), "w", encoding="utf8") as f:
         f.write(json.dumps(result, cls=ProblemEncoder))
 
