@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, request, flash, send_from_directory, send_file, jsonify
 from edulint.config.config import get_config
 from edulint.linting.linting import lint
-from edulint.linting.problem import ProblemEncoder
+from edulint.linting.problem import Problem
 from edulint.explanations import get_explanations
 import os
 import json
@@ -75,10 +75,12 @@ def analyze(code_hash: str):
 
     config = get_config(code_path(code_hash))
     result = lint(code_path(code_hash), config)
-    with open(problems_path(code_hash), "w", encoding="utf8") as f:
-        f.write(json.dumps(result, cls=ProblemEncoder))
 
-    return jsonify(result)
+    result_json = Problem.schema().dumps(result, indent=2, many=True)
+    with open(problems_path(code_hash), "w", encoding="utf8") as f:
+        f.write(result_json)
+    
+    return result_json
 
 
 @app.route("/analyze", methods=["POST"])
