@@ -73,7 +73,7 @@ def analyze(code_hash: str):
         with open(problems_path(code_hash), encoding="utf8") as f:
             return f.read()
 
-    config = get_config(code_path(code_hash))
+    config = get_config(code_path(code_hash), [])
     result = lint_one(code_path(code_hash), config)
 
     result_json = Problem.schema().dumps(result, indent=2, many=True)
