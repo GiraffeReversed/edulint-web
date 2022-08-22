@@ -281,6 +281,8 @@ function resetAnalysis() {
 
     let alertNot200 = document.getElementById("alertNot200");
     alertNot200.style.display = "none";
+
+    editor.doc.clearGutter("problemMarkers");
 }
 
 function analyze(e) {
