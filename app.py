@@ -108,6 +108,14 @@ def explanations():
     return send_file(explanations_path())
 
 
+@app.route("/editor/code/umime_count_a", methods=["GET"])
+def editor_example_umime():
+    return redirect(url_for(
+        "editor_code",
+        code_hash="c4bc51f7d34f9340c33e0b3b9dcfd12aa8917fe5a11faa5f6385f5bb41be9fcf",
+    ))
+
+
 @app.route("/editor/code/<string:code_hash>", methods=["GET"])
 def editor_code(code_hash: str):
     with open(code_path(code_hash)) as f:
