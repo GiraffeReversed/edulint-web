@@ -272,11 +272,23 @@ function registerProblemCallbacks() {
     }
 }
 
+function resetAnalysis() {
+    let problemsBlock = document.getElementById("problems");
+    problemsBlock.innerHTML = "";
+
+    let noProblemsAlert = document.getElementById("alertNoProblems");
+    noProblemsAlert.style.display = "none";
+
+    let alertNot200 = document.getElementById("alertNot200");
+    alertNot200.style.display = "none";
+}
+
 function analyze(e) {
     let lintButton = e.currentTarget;
     lintButton.firstElementChild.hidden = false;
-    let problemsBlock = document.getElementById("problems");
-    problemsBlock.innerHTML = ""
+
+    resetAnalysis();
+
     fetch("/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -284,13 +296,34 @@ function analyze(e) {
             code: editor.getValue()
         })
     })
-        .then(response => response.json()) // .json() for Objects vs text() for raw
+        .then(response => {
+            if (response.status !== 200) {
+                const error = new Error("not 200 status code");
+                error.name = "errorNot200";
+                error.status = response.status;
+                throw error;
+            }
+            return response.json() // .json() for Objects vs text() for raw
+        })
         .then(problems => {
+            if (problems.length === 0) {
+                let alertNoProblems = document.getElementById("alertNoProblems")
+                alertNoProblems.style.display = "block";
+            }
+            let problemsBlock = document.getElementById("problems");
             problemsBlock.innerHTML = problemsHTML(problems);
             registerProblemCallbacks();
-            lintButton.firstElementChild.hidden = true;
-        }
-        );
+        })
+        .catch(error => {
+            if (error?.name === "errorNot200") {
+                let alertNot200 = document.getElementById("alertNot200");
+                alertNot200.style.display = "block";
+                alertNot200.children[0].innerHTML = error.status;
+            } else {
+                throw error;
+            }
+        })
+        .finally(() => { lintButton.firstElementChild.hidden = true; });
     document.getElementById("keybind").hidden = false;
 }
 

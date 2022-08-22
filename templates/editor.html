@@ -42,7 +42,15 @@
   </div>
   <div id="problems-block" class="d-flex flex-column m-3 ms-0 mt-1">
     <h5 class="ms-2">Problems</h5>
-    <div id="problems" class="pt-1 pe-1 ps-2">
+    <div class="pt-1 pe-1 ps-2">
+      <div class="alert alert-success" role="alert" id="alertNoProblems" style="display: none">
+        I have found no problems with this code :)
+      </div>
+      <div class="alert alert-danger" role="alert" id="alertNot200" style="display: none">
+        Server responded with the status code <span></span>.
+      </div>
+      <div id="problems">
+      </div>
     </div>
   </div>
 
