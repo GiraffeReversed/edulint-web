@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, flash, send_from_directory, send_file
+from flask import Flask, render_template, redirect, request, flash, send_from_directory, send_file, url_for
 from edulint.config.config import get_config
 from edulint.linting.linting import lint_one
 from edulint.linting.problem import Problem
@@ -108,9 +108,9 @@ def explanations():
     return send_file(explanations_path())
 
 
-@app.route("/editor/default", methods=["GET"])
-def editor_default():
-    with open(code_path("default")) as f:
+@app.route("/editor/code/<string:code_hash>", methods=["GET"])
+def editor_code(code_hash: str):
+    with open(code_path(code_hash)) as f:
         return render_template("editor.html", textarea=f.read())
 
 
