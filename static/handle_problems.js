@@ -76,7 +76,7 @@ function setupEditor() {
     });
 
     editor.addKeyMap({
-        "Ctrl-S": () => { showAlert("toastNoSave"); },
+        "Ctrl-S": () => { showToast("toastNoSave"); },
         "Ctrl-D": markLinesSolved
     });
 }
@@ -90,7 +90,7 @@ function makeMarker(lineIndex) {
     return marker;
 }
 
-function showAlert(id) {
+function showToast(id) {
     let toast = bootstrap.Toast.getOrCreateInstance(document.getElementById(id));
     toast.show();
 }
@@ -197,7 +197,7 @@ function jumpToLine(n) {
 function gotoCodeClick(problemInfoBtn) {
     let lineIndex = getCurrentLineIndex(Number(problemInfoBtn.dataset.line));
     if (!lineIndex) {
-        showAlert("toastLineDeleted");
+        showToast("toastLineDeleted");
         return;
     }
 
@@ -332,7 +332,7 @@ function analyze(e) {
 function loadFile() {
     let file = this.files[0];
     if (!file || !file.name.endsWith(".py")) {
-        showAlert("toastIncorrectFiletype");
+        showToast("toastIncorrectFiletype");
         return;
     }
 
@@ -350,7 +350,7 @@ function downloadFile() {
     let text = editor.getValue();
     console.log(text);
     if (!text) {
-        showAlert("toastUnnecessaryDownload");
+        showToast("toastUnnecessaryDownload");
         return;
     }
 
@@ -371,7 +371,7 @@ function downloadFile() {
         }, 0);
     }
 
-    showAlert("toastDangerousDownload");
+    showToast("toastDangerousDownload");
 }
 
 function setup() {
