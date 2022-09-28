@@ -52,6 +52,8 @@ function highlightActiveNavlink() {
         document.getElementById("navLinkAbout").classList.add("active");
     else if (path.includes("faq"))
         document.getElementById("navLinkFAQ").classList.add("active");
+    else if (path.includes("teachers"))
+        document.getElementById("navLinkTeachers").classList.add("active");
 }
 
 function baseSetup() {

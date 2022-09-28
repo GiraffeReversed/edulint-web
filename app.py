@@ -132,6 +132,11 @@ def faq():
     return render_template("faq.html")
 
 
+@app.route("/teachers", methods=["GET"])
+def teachers():
+    return render_template("teachers.html")
+
+
 # rightfully stolen from
 # https://stackoverflow.com/a/14625619
 @app.route('/robots.txt')

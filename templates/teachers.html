@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block content %}
+
+<div id="teachers" class="m-3 mt-1 card-container">
+  <div class="card mb-3">
+    <div class="card-body">
+      <section id="teachers-configuration">
+        <h5 class="card-title">How to configure the linter?</h5>
+        <p class="card-text">The full documentation of the underlying Python package <code>edulint</code> can be found
+          at <a href="https://edulint.readthedocs.io/en/latest/" class="link-secondary">edulint.rtfd.io</a>. It contains
+          <a href="https://edulint.readthedocs.io/en/latest/#options" class="link-secondary">the full list of available
+            options</a> with <a
+            href="https://edulint.readthedocs.io/en/latest/#configuration-through-comments-in-the-code"
+            class="link-secondary">a description of how to enable them in the code</a>.
+        </p>
+        <p class="card-text" class="link-secondary">This tool is still a work in progress, so the list of available
+          options might differ from the options available in the tool's version this web's server is running.</p>
+      </section>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <section id="teachers-run-locally">
+        <h5 class="card-title">Can I run the linter locally?</h5>
+        <p class="card-text">Yes, the web interface only wraps the Python package <code>edulint</code>. For quickstart,
+          see <a href="https://edulint.readthedocs.io/en/latest/#quick-start" class="link-secondary">the
+            documentation</a>.</p>
+      </section>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <section id="ctrl-s-captured">
+        <h5 class="card-title">Are there some interesting inputs I might try the tool on?</h5>
+        <p class="card-text">Yes. At the present moment, <a href="{{url_for('editor_example_umime') }}"
+            class="link-secondary">this code</a> showcases most of the tool's abilities.</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
