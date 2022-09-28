@@ -61,7 +61,8 @@ function setupEditor() {
         styleActiveLine: true,
         gutters: ["problemMarkers", "CodeMirror-linenumbers"],
         rulers: [{ color: "#ddd", column: 79, lineStyle: "dotted" }],
-        theme: darkmode.inDarkMode ? EDITOR_DARK_THEME : EDITOR_LIGHT_THEME
+        theme: darkmode.inDarkMode ? EDITOR_DARK_THEME : EDITOR_LIGHT_THEME,
+        indentUnit: 4,
     });
 
     editor.on("gutterClick", (cm, n) => {
@@ -77,7 +78,8 @@ function setupEditor() {
 
     editor.addKeyMap({
         "Ctrl-S": () => { showToast("toastNoSave"); },
-        "Ctrl-D": markLinesSolved
+        "Ctrl-D": markLinesSolved,
+        "Tab": (cm) => { cm.replaceSelection(" ".repeat(cm.options.tabSize), "end"); }
     });
 }
 
