@@ -12,10 +12,10 @@ class Version:
         self.version = Version.parse(version_raw)
 
     def name(self) -> str:
-        return "_".join(self.version)
+        return "_".join(map(str, self.version))
 
-    def version_str(self) -> str:
-        return ".".join(self.version)
+    def __str__(self) -> str:
+        return ".".join(map(str, self.version))
 
     def dir(self, prefix: str) -> str:
         return f"{prefix}_{self.name()}"
@@ -24,7 +24,7 @@ class Version:
     def parse(version_raw: str) -> Optional["Version"]:
         version_split = version_raw.split(".")
 
-        if len(version_split) != 3 or not all(v.is_decimal() for v in version_split):
+        if len(version_split) != 3 or not all(v.isdecimal() for v in version_split):
             return None
 
         return tuple([int(v) for v in version_split])
