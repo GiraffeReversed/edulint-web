@@ -84,7 +84,7 @@ def analyze(version_raw: str, code_hash: str):
     if not code_hash.isalnum():
         return {"message": "Don't even try"}, 400
 
-    version = Version(version_raw)
+    version = Version.parse(version_raw)
     if version is None or version not in get_available_versions():
         return {"message": "Invalid version"}, 404
 
