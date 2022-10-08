@@ -4,4 +4,5 @@ Allow: /static/
 Allow: /editor
 Allow: /about
 Allow: /faq
+Disallow: /editor/code
 Disallow: /
