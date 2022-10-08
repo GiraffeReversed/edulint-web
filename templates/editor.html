@@ -15,6 +15,19 @@
 
 {% endblock %}
 
+{% block versions %}
+
+<li class="nav-item d-flex align-items-center">
+  <select class="form-select form-select-sm" aria-label=".form-select-sm">
+    {% for version in versions %}
+    <option value="{{ version }}">v{{ version }}</option>
+    {% endfor %}
+  </select>
+</li>
+
+
+{% endblock %}
+
 {% block content %}
 
 <div class="d-flex flex-row flex-fill" id="analysis-block">
