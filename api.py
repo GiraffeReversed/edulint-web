@@ -6,14 +6,9 @@ from os import path
 from flask_talisman import Talisman
 from werkzeug.middleware.proxy_fix import ProxyFix
 from markdown import markdown
-from typing import List
 import sys
 import toml
 
-from edulint.config.config import get_config
-from edulint.linting.linting import lint_one
-from edulint.linting.problem import Problem
-from edulint.explanations import get_explanations
 from utils import code_path, problems_path, explanations_path, get_available_versions, get_latest, Version
 
 app = Flask(__name__)
@@ -49,7 +44,7 @@ def with_version(version, function, *args, **kwargs):
     original_pypath = os.environ.get("PYTHONPATH")
     os.environ["PYTHONPATH"] = linter_dir + (f":{original_pypath}" if original_pypath else "")
 
-    function(*args, **kwargs)
+    result = function(*args, **kwargs)
 
     sys.path = original_sys_path
     if original_pypath is None:
@@ -61,12 +56,18 @@ def with_version(version, function, *args, **kwargs):
         if any(m in module for m in ["edulint", "pylint", "flake8"]):
             sys.modules.pop(module)
 
-
-def lint(cpath: str) -> List[Problem]:
-    config = get_config(cpath, [])
-    result = lint_one(cpath, config)
-
     return result
+
+
+def lint(cpath: str) -> str:
+    import edulint
+
+    config = edulint.config.get_config(cpath, [])
+    result = edulint.linting.lint_one(cpath, config)
+
+    result_json = edulint.linting.Problem.schema().dumps(result, indent=2, many=True)
+
+    return result_json
 
 
 @app.route("/api/<string:version>/analyze/<string:code_hash>", methods=["GET"])
@@ -91,11 +92,10 @@ def analyze(version_raw: str, code_hash: str):
 
     result = with_version(version, lint, cpath)
 
-    result_json = Problem.schema().dumps(result, indent=2, many=True)
     with open(ppath, "w", encoding="utf8") as f:
-        f.write(result_json)
+        f.write(result)
 
-    return result_json
+    return result
 
 
 @app.route("/api/<string:version>/analyze", methods=["POST"])
@@ -104,7 +104,13 @@ def combine(version: str):
     return analyze(version, code_hash)
 
 
-@ app.before_first_request
+def get_explanations():
+    import edulint
+
+    return edulint.explanations.get_explanations()
+
+
+@app.before_first_request
 def prepare_HTML_explanations():
     exps = with_version(get_latest(), get_explanations)
 
