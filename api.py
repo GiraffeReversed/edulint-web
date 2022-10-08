@@ -9,7 +9,7 @@ from markdown import markdown
 import sys
 import toml
 
-from utils import code_path, problems_path, explanations_path, get_available_versions, get_latest, Version
+from utils import code_path, problems_path, explanations_path, get_latest, Version
 
 app = Flask(__name__)
 app.config.from_file("config.toml", load=toml.load)
@@ -76,7 +76,7 @@ def analyze(version_raw: str, code_hash: str):
         return {"message": "Don't even try"}, 400
 
     version = Version.parse(version_raw)
-    if version is None or version not in get_available_versions():
+    if version is None or version not in app.config["VERSIONS"]:
         return {"message": "Invalid version"}, 404
 
     cpath = code_path(app.config, code_hash)
