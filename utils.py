@@ -1,5 +1,5 @@
 import os
-from typing import Tuple, Optional
+from typing import Tuple, Dict, Optional
 from dataclasses import dataclass
 
 
@@ -35,9 +35,9 @@ def full_path(upload_folder: str, filename: str, version: Optional[Version] = No
     return os.path.join(upload_folder, f"{filename}{version_name}")
 
 
-def code_path(upload_folder: str, code_hash: str) -> str:
-    return full_path(upload_folder, code_hash) + ".py"
+def code_path(config: Dict[str, str], code_hash: str) -> str:
+    return full_path(config["CODE_FOLDER"], code_hash) + ".py"
 
 
-def problems_path(upload_folder: str, code_hash: str, version: Version) -> str:
-    return full_path(upload_folder, code_hash, version) + ".json"
+def problems_path(config: Dict[str, str], code_hash: str, version: Version) -> str:
+    return full_path(config["ANALYSIS_FOLDER"], code_hash, version) + ".json"

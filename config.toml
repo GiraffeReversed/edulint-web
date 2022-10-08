@@ -1,0 +1,5 @@
+CODE_FOLDER=codes
+ANALYSIS_FOLDER=analyses
+VERSIONS_FOLDER=versions
+LINTER_FOLDER_PREFIX=edulint
+EXPLANATIONS=explanations.json
