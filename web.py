@@ -1,13 +1,13 @@
 from flask import Flask, render_template, redirect, request, send_from_directory, url_for
 from flask_talisman import Talisman
 from werkzeug.middleware.proxy_fix import ProxyFix
+import toml
 
 from utils import code_path
 
 
 app = Flask(__name__)
-app.config["UPLOAD_FOLDER"] = "uploaded_files"
-app.config["EXPLANATIONS"] = "explanations.json"
+app.config.from_file("config.toml", load=toml.load)
 app.secret_key = "super secret key"
 
 Talisman(app, content_security_policy=None,
@@ -35,7 +35,7 @@ def editor_example_umime():
 
 @app.route("/editor/code/<string:code_hash>", methods=["GET"])
 def editor_code(code_hash: str):
-    with open(code_path(app.config["UPLOAD_FOLDER"], code_hash)) as f:
+    with open(code_path(app.config, code_hash)) as f:
         return render_template("editor.html", textarea=f.read())
 
 

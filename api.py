@@ -8,6 +8,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from markdown import markdown
 from typing import List
 import sys
+import toml
 
 from edulint.config.config import get_config
 from edulint.linting.linting import lint_one
@@ -16,9 +17,7 @@ from edulint.explanations import get_explanations
 from utils import code_path, problems_path, Version
 
 app = Flask(__name__)
-app.config["UPLOAD_FOLDER"] = "uploaded_files"
-app.config["LINTER_FOLDER_PREFIX"] = "edulint"
-app.config["EXPLANATIONS"] = "explanations.json"
+app.config.from_file("config.toml", load=toml.load)
 app.secret_key = "super secret key"
 
 Talisman(app, content_security_policy=None,
@@ -44,14 +43,17 @@ def upload_code():
     code_hash = sha256(code.encode("utf8")).hexdigest()
 
     if not path.exists(code_path(code_hash)):
-        with open(code_path(app.config["UPLOAD_FOLDER"], code_hash), "w", encoding="utf8") as f:
+        with open(code_path(app.config, code_hash), "w", encoding="utf8") as f:
             f.write(code)
 
     return {"filename": code_hash}
 
 
 def with_version(version, function, *args, **kwargs):
-    linter_dir = os.path.join(os.get_cwd(), version.dir(app.config["LINTER_FOLDER_PREFIX"]))
+    linter_dir = os.path.join(
+        os.get_cwd(),
+        app.config["VERSIONS_FOLDER"],
+        version.dir(app.config["LINTER_FOLDER_PREFIX"]))
 
     original_sys_path = sys.path[:]
     sys.path.insert(0, linter_dir)
@@ -88,8 +90,8 @@ def analyze(version_raw: str, code_hash: str):
     if version is None or version not in get_available_versions():
         return {"message": "Invalid version"}, 404
 
-    cpath = code_path(app.config["UPLOAD_FOLDER"], code_hash)
-    ppath = problems_path(app.config["UPLOAD_FOLDER"], code_hash, version)
+    cpath = code_path(app.config, code_hash)
+    ppath = problems_path(app.config, code_hash, version)
 
     if not path.exists(cpath):
         flash('No such file uploaded')
