@@ -1,42 +1,33 @@
-from flask import Flask, redirect, request, flash, send_file
+from flask import Blueprint, redirect, request, flash, send_file, current_app
 import os
-import json
 from hashlib import sha256
 from os import path
-from flask_talisman import Talisman
-from werkzeug.middleware.proxy_fix import ProxyFix
-from markdown import markdown
 import sys
-import toml
 
-from utils import code_path, problems_path, explanations_path, get_latest, Version
-
-app = Flask(__name__)
-app.config.from_file("config.toml", load=toml.load)
-app.secret_key = "super secret key"
-
-Talisman(app, content_security_policy=None,
-         strict_transport_security=False, force_https=False)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
+from utils import code_path, problems_path, explanations_path, Version
 
 
-@app.route("/api/upload_code", methods=["POST"])
+bp = Blueprint('api', __name__, url_prefix='/api')
+
+
+@bp.route("/upload_code", methods=["POST"])
 def upload_code():
     code = request.get_json()["code"]
     code_hash = sha256(code.encode("utf8")).hexdigest()
 
-    if not path.exists(code_path(code_hash)):
-        with open(code_path(app.config, code_hash), "w", encoding="utf8") as f:
+    if not path.exists(code_path(current_app.config, code_hash)):
+        with open(code_path(current_app.config, code_hash), "w", encoding="utf8") as f:
             f.write(code)
 
     return {"filename": code_hash}
 
 
-def with_version(version, function, *args, **kwargs):
+def with_version(version: Version, function, *args, **kwargs):
     linter_dir = os.path.join(
-        os.get_cwd(),
-        app.config["VERSIONS_FOLDER"],
-        version.dir(app.config["LINTER_FOLDER_PREFIX"]))
+        os.getcwd(),
+        current_app.config["VERSIONS_FOLDER"],
+        version.dir(current_app.config["LINTER_FOLDER_PREFIX"])
+    )
 
     original_sys_path = sys.path[:]
     sys.path.insert(0, linter_dir)
@@ -62,25 +53,25 @@ def with_version(version, function, *args, **kwargs):
 def lint(cpath: str) -> str:
     import edulint
 
-    config = edulint.config.get_config(cpath, [])
-    result = edulint.linting.lint_one(cpath, config)
+    config = edulint.config.config.get_config(cpath, [])
+    result = edulint.linting.linting.lint_one(cpath, config)
 
-    result_json = edulint.linting.Problem.schema().dumps(result, indent=2, many=True)
+    result_json = edulint.linting.problem.Problem.schema().dumps(result, indent=2, many=True)
 
     return result_json
 
 
-@app.route("/api/<string:version>/analyze/<string:code_hash>", methods=["GET"])
+@bp.route("/<string:version>/analyze/<string:code_hash>", methods=["GET"])
 def analyze(version_raw: str, code_hash: str):
     if not code_hash.isalnum():
         return {"message": "Don't even try"}, 400
 
     version = Version.parse(version_raw)
-    if version is None or version not in app.config["VERSIONS"]:
+    if version is None or version not in current_app.config["VERSIONS"]:
         return {"message": "Invalid version"}, 404
 
-    cpath = code_path(app.config, code_hash)
-    ppath = problems_path(app.config, code_hash, version)
+    cpath = code_path(current_app.config, code_hash)
+    ppath = problems_path(current_app.config, code_hash, version)
 
     if not path.exists(cpath):
         flash('No such file uploaded')
@@ -98,37 +89,12 @@ def analyze(version_raw: str, code_hash: str):
     return result
 
 
-@app.route("/api/<string:version>/analyze", methods=["POST"])
+@bp.route("/<string:version>/analyze", methods=["POST"])
 def combine(version: str):
     code_hash = upload_code()["filename"]
     return analyze(version, code_hash)
 
 
-def get_explanations():
-    import edulint
-
-    return edulint.explanations.get_explanations()
-
-
-@app.before_first_request
-def prepare_HTML_explanations():
-    exps = with_version(get_latest(), get_explanations)
-
-    HTML_exps = {
-        code: {
-            key: markdown(
-                exps[code][key]) for key in exps[code]
-        } for code in exps
-    }
-
-    with open(explanations_path(app.config), "w") as f:
-        f.write(json.dumps(HTML_exps))
-
-
-@app.route("/api/explanations", methods=["GET"])
+@bp.route("/explanations", methods=["GET"])
 def explanations():
-    return send_file(explanations_path(app.config))
-
-
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    return send_file(explanations_path(current_app.config))
