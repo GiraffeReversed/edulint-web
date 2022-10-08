@@ -135,4 +135,7 @@ uploaded_files/*
 
 !**/.gitkeep
 
+# generated files
 static/explanations.json
+versions/*
+config.toml
