@@ -15,6 +15,12 @@ Talisman(app, content_security_policy=None,
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
 
 
+def get_versions():
+    versions = app.config["VERSIONS"]
+    assert versions
+    return sorted(versions, reverse=True)
+
+
 @app.route("/")
 def default_path():
     return redirect("editor", code=302)
@@ -22,7 +28,7 @@ def default_path():
 
 @app.route("/editor", methods=["GET"])
 def editor():
-    return render_template("editor.html")
+    return render_template("editor.html", versions=get_versions())
 
 
 @app.route("/editor/code/umime_count_a", methods=["GET"])
@@ -36,7 +42,7 @@ def editor_example_umime():
 @app.route("/editor/code/<string:code_hash>", methods=["GET"])
 def editor_code(code_hash: str):
     with open(code_path(app.config, code_hash)) as f:
-        return render_template("editor.html", textarea=f.read())
+        return render_template("editor.html", textarea=f.read(), versions=get_versions())
 
 
 @app.route("/about", methods=["GET"])
