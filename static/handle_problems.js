@@ -287,13 +287,22 @@ function resetAnalysis() {
     editor.doc.clearGutter("problemMarkers");
 }
 
+function getSelectedVersion() {
+    let select = document.getElementById("versionsSelect");
+    let option = select.options[select.selectedIndex];
+
+    return option.value;
+}
+
 function analyze(e) {
     let lintButton = e.currentTarget;
     lintButton.firstElementChild.hidden = false;
 
     resetAnalysis();
 
-    fetch("/analyze", {
+    let version = getSelectedVersion();
+
+    fetch(`/api/${version}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -388,7 +397,7 @@ function setup() {
     document.getElementById('inputFile', false).addEventListener('click', resetFile);
     document.getElementById('downloadFile').addEventListener('click', downloadFile);
 
-    fetch("/explanations", { method: "GET", })
+    fetch("/api/explanations", { method: "GET", })
         .then(response => response.json())
         .then(exp => { explanations = exp; });
 }
