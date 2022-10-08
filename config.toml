@@ -3,3 +3,4 @@ ANALYSIS_FOLDER = "analyses"
 VERSIONS_FOLDER = "versions"
 LINTER_FOLDER_PREFIX = "edulint"
 EXPLANATIONS = "explanations.json"
+VERSIONS = ["0.0.12", "0.0.13", "1.0.0"]

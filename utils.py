@@ -1,5 +1,5 @@
 import os
-from typing import Tuple, Dict, List, Optional
+from typing import Tuple, Dict, Optional
 from dataclasses import dataclass
 
 
@@ -45,10 +45,6 @@ def problems_path(config: Dict[str, str], code_hash: str, version: Version) -> s
 
 def explanations_path(config: Dict[str, str]) -> str:
     return os.path.join("static", config["EXPLANATIONS"])
-
-
-def get_available_versions() -> List[Version]:
-    return []
 
 
 def get_latest() -> Version:
