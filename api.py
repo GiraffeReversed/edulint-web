@@ -6,15 +6,18 @@ from os import path
 from flask_talisman import Talisman
 from werkzeug.middleware.proxy_fix import ProxyFix
 from markdown import markdown
+from typing import List
+import sys
 
 from edulint.config.config import get_config
 from edulint.linting.linting import lint_one
 from edulint.linting.problem import Problem
 from edulint.explanations import get_explanations
-from utils import code_path, problems_path
+from utils import code_path, problems_path, Version
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = "uploaded_files"
+app.config["LINTER_FOLDER_PREFIX"] = "edulint"
 app.config["EXPLANATIONS"] = "explanations.json"
 app.secret_key = "super secret key"
 
@@ -27,7 +30,15 @@ def explanations_path() -> str:
     return os.path.join("static", app.config["EXPLANATIONS"])
 
 
-@app.route("/upload_code", methods=["POST"])
+def get_available_versions() -> List[Version]:
+    return []
+
+
+def get_latest() -> Version:
+    return max(Version)
+
+
+@app.route("/api/upload_code", methods=["POST"])
 def upload_code():
     code = request.get_json()["code"]
     code_hash = sha256(code.encode("utf8")).hexdigest()
@@ -39,38 +50,74 @@ def upload_code():
     return {"filename": code_hash}
 
 
-@app.route("/analyze/<string:code_hash>", methods=["GET"])
-def analyze(code_hash: str):
+def with_version(version, function, *args, **kwargs):
+    linter_dir = os.path.join(os.get_cwd(), version.dir(app.config["LINTER_FOLDER_PREFIX"]))
+
+    original_sys_path = sys.path[:]
+    sys.path.insert(0, linter_dir)
+
+    original_pypath = os.environ.get("PYTHONPATH")
+    os.environ["PYTHONPATH"] = linter_dir + (f":{original_pypath}" if original_pypath else "")
+
+    function(*args, **kwargs)
+
+    sys.path = original_sys_path
+    if original_pypath is None:
+        os.environ.pop("PYTHONPATH")
+    else:
+        os.environ["PYTHONPATH"] = original_pypath
+
+    for module in sys.modules.copy():
+        if any(m in module for m in ["edulint", "pylint", "flake8"]):
+            sys.modules.pop(module)
+
+
+def lint(cpath: str) -> List[Problem]:
+    config = get_config(cpath, [])
+    result = lint_one(cpath, config)
+
+    return result
+
+
+@app.route("/api/<string:version>/analyze/<string:code_hash>", methods=["GET"])
+def analyze(version_raw: str, code_hash: str):
     if not code_hash.isalnum():
         return {"message": "Don't even try"}, 400
 
-    if not path.exists(code_path(app.config["UPLOAD_FOLDER"], code_hash)):
+    version = Version(version_raw)
+    if version is None or version not in get_available_versions():
+        return {"message": "Invalid version"}, 404
+
+    cpath = code_path(app.config["UPLOAD_FOLDER"], code_hash)
+    ppath = problems_path(app.config["UPLOAD_FOLDER"], code_hash, version)
+
+    if not path.exists(cpath):
         flash('No such file uploaded')
         return redirect("/editor", code=302)
 
-    if path.exists(problems_path(app.config["UPLOAD_FOLDER"], code_hash)):
-        with open(problems_path(app.config["UPLOAD_FOLDER"], code_hash), encoding="utf8") as f:
+    if path.exists(ppath):
+        with open(ppath, encoding="utf8") as f:
             return f.read()
 
-    config = get_config(code_path(app.config["UPLOAD_FOLDER"], code_hash), [])
-    result = lint_one(code_path(app.config["UPLOAD_FOLDER"], code_hash), config)
+    result = with_version(version, lint, cpath)
 
     result_json = Problem.schema().dumps(result, indent=2, many=True)
-    with open(problems_path(app.config["UPLOAD_FOLDER"], code_hash), "w", encoding="utf8") as f:
+    with open(ppath, "w", encoding="utf8") as f:
         f.write(result_json)
 
     return result_json
 
 
-@app.route("/analyze", methods=["POST"])
-def combine():
+@app.route("/api/<string:version>/analyze", methods=["POST"])
+def combine(version: str):
     code_hash = upload_code()["filename"]
-    return analyze(code_hash)
+    return analyze(version, code_hash)
 
 
-@app.before_first_request
+@ app.before_first_request
 def prepare_HTML_explanations():
-    exps = get_explanations()
+    exps = with_version(get_latest(), get_explanations)
+
     HTML_exps = {
         code: {
             key: markdown(
@@ -82,7 +129,7 @@ def prepare_HTML_explanations():
         f.write(json.dumps(HTML_exps))
 
 
-@app.route("/explanations", methods=["GET"])
+@app.route("/api/explanations", methods=["GET"])
 def explanations():
     return send_file(explanations_path())
 
