@@ -14,7 +14,7 @@ from edulint.config.config import get_config
 from edulint.linting.linting import lint_one
 from edulint.linting.problem import Problem
 from edulint.explanations import get_explanations
-from utils import code_path, problems_path, Version
+from utils import code_path, problems_path, explanations_path, get_available_versions, get_latest, Version
 
 app = Flask(__name__)
 app.config.from_file("config.toml", load=toml.load)
@@ -23,18 +23,6 @@ app.secret_key = "super secret key"
 Talisman(app, content_security_policy=None,
          strict_transport_security=False, force_https=False)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
-
-
-def explanations_path() -> str:
-    return os.path.join("static", app.config["EXPLANATIONS"])
-
-
-def get_available_versions() -> List[Version]:
-    return []
-
-
-def get_latest() -> Version:
-    return max(Version)
 
 
 @app.route("/api/upload_code", methods=["POST"])
@@ -127,13 +115,13 @@ def prepare_HTML_explanations():
         } for code in exps
     }
 
-    with open(explanations_path(), "w") as f:
+    with open(explanations_path(app.config), "w") as f:
         f.write(json.dumps(HTML_exps))
 
 
 @app.route("/api/explanations", methods=["GET"])
 def explanations():
-    return send_file(explanations_path())
+    return send_file(explanations_path(app.config))
 
 
 if __name__ == "__main__":
