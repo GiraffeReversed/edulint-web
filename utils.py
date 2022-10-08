@@ -6,10 +6,11 @@ from dataclasses import dataclass
 @dataclass(init=False, order=True)
 class Version:
 
-    version: Tuple[int, int, int]
+    _Version = Tuple[int, int, int]
+    version: _Version
 
     def __init__(self, version_raw):
-        self.version = Version.parse(version_raw)
+        self.version = tuple([int(v) for v in version_raw.split(".")])
 
     def name(self) -> str:
         return "_".join(map(str, self.version))
@@ -21,13 +22,17 @@ class Version:
         return f"{prefix}_{self.name()}"
 
     @staticmethod
-    def parse(version_raw: str) -> Optional["Version"]:
+    def is_valid(version_raw: str) -> bool:
         version_split = version_raw.split(".")
 
-        if len(version_split) != 3 or not all(v.isdecimal() for v in version_split):
+        return len(version_split) == 3 and all(v.isdecimal() for v in version_split)
+
+    @staticmethod
+    def parse(version_raw: str) -> Optional["Version"]:
+        if not Version.is_valid(version_raw):
             return None
 
-        return tuple([int(v) for v in version_split])
+        return Version(version_raw)
 
 
 def full_path(upload_folder: str, filename: str, version: Optional[Version] = None) -> str:
@@ -47,5 +52,5 @@ def explanations_path(config: Dict[str, str]) -> str:
     return os.path.join("static", config["EXPLANATIONS"])
 
 
-def get_latest() -> Version:
-    return max(Version)
+def get_latest(versions: List[Version]) -> Version:
+    return max(versions)
