@@ -1,4 +1,3 @@
-edulint
 flask
 flask-talisman
 gunicorn
