@@ -18,7 +18,7 @@
 {% block versions %}
 
 <li class="nav-item d-flex align-items-center">
-  <select class="form-select form-select-sm" aria-label=".form-select-sm">
+  <select class="form-select form-select-sm" aria-label=".form-select-sm" id="versionsSelect">
     {% for version in versions %}
     <option value="{{ version }}">v{{ version }}</option>
     {% endfor %}

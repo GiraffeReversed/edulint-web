@@ -1,6 +1,7 @@
 import os
-from typing import Tuple, Dict, Optional
+from typing import Tuple, Dict, List, Optional
 from dataclasses import dataclass
+import functools
 
 
 @dataclass(init=False, order=True)
@@ -50,6 +51,11 @@ def problems_path(config: Dict[str, str], code_hash: str, version: Version) -> s
 
 def explanations_path(config: Dict[str, str]) -> str:
     return os.path.join("static", config["EXPLANATIONS"])
+
+
+@functools.lru_cache
+def get_available_versions(versions_raw: List[str]) -> List[Version]:
+    return [Version(v) for v in versions_raw]
 
 
 def get_latest(versions: List[Version]) -> Version:

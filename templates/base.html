@@ -81,19 +81,20 @@
 <body>
   <nav class="navbar navbar-expand navbar-light shadow bg-gradient">
     <div class="container-lg">
-      <a class="navbar-brand" href="{{ url_for('editor') }}">EduLint</a>
+      <a class="navbar-brand" href="{{ url_for('web.editor') }}">EduLint</a>
       <ul class="navbar-nav me-auto">
         <li class="nav-item">
-          <a class="nav-link" aria-current="page" href="{{ url_for('editor') }}" id="navLinkEditor">Editor</a>
+          <a class="nav-link" aria-current="page" href="{{ url_for('web.editor') }}" id="navLinkEditor">Editor</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" aria-current="page" href="{{ url_for('teachers') }}" id="navLinkTeachers">For teachers</a>
+          <a class="nav-link" aria-current="page" href="{{ url_for('web.teachers') }}" id="navLinkTeachers">For
+            teachers</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" aria-current="page" href="{{ url_for('faq') }}" id="navLinkFAQ">FAQ</a>
+          <a class="nav-link" aria-current="page" href="{{ url_for('web.faq') }}" id="navLinkFAQ">FAQ</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" aria-current="page" href="{{ url_for('about') }}" id="navLinkAbout">About</a>
+          <a class="nav-link" aria-current="page" href="{{ url_for('web.about') }}" id="navLinkAbout">About</a>
         </li>
       </ul>
       <ul class="navbar-nav">
