@@ -1,15 +1,28 @@
 version: '3'
 services:
-  flask:
+  web:
+    container_name: edulint_web
     build: .
     restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     volumes:
-      - ./uploaded_files:/app/uploaded_files
+      - ./codes:/app/codes
+    entrypoint: [ "gunicorn", "--bind", "0.0.0.0:5000", "-w", "4", "--worker-class", "gevent", "app:app" ]
 
-networks:
-  default:
-    external:
-      name: dockerInternal
 
+  api:
+    container_name: edulint_api
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./codes:/app/codes
+    entrypoint: [ "gunicorn", "--bind", "0.0.0.0:5000", "-w", "4", "--worker-class", "sync", "app:app" ]
+
+  nginx:
+    container_name: edulint_proxy
+    build: ./nginx/
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:4999:80
+    depends_on:
+      - web
+      - api
