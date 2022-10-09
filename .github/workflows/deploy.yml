@@ -1,5 +1,10 @@
 name: Start remote deploy
-on: [push]
+
+on:
+  push:
+    branches:
+      main
+
 jobs:
   Start-remote-deploy:
     runs-on: ubuntu-latest
