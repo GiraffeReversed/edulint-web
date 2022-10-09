@@ -18,7 +18,7 @@ CONFIG = {
 
 def get_versions():
     def filter(versions):
-        return [v for v in versions if v >= Version("0.0.12")]
+        return [v for v in versions if v >= Version("1.0.0")]
 
     edulint_info = requests.get("https://pypi.org/pypi/edulint/json").json()
     return filter([Version(v) for v in edulint_info["releases"].keys()])
