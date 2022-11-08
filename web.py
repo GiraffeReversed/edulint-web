@@ -3,7 +3,7 @@ from flask import redirect, request, current_app, send_from_directory, url_for, 
 from utils import code_path
 
 
-bp = Blueprint('web', __name__, template_folder='templates')
+bp = Blueprint('web', __name__, template_folder='templates', static_folder='static')
 
 
 def get_versions():
@@ -55,4 +55,5 @@ def teachers():
 # https://stackoverflow.com/a/14625619
 @bp.route('/robots.txt')
 def static_from_root():
+    print(bp.static_folder, request.path[1:])
     return send_from_directory(bp.static_folder, request.path[1:])
