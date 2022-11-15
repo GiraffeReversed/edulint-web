@@ -298,11 +298,6 @@ function analyze(e) {
     let lintButton = e.currentTarget;
     lintButton.firstElementChild.hidden = false;
 
-    if (!window.location.pathname.includes("code") && window.localStorage.getItem("seenPrivacyPolicyToast") !== "true") {
-        showToast("toastPrivacyPolicy");
-        window.localStorage.setItem("seenPrivacyPolicyToast", "true");
-    }
-
     resetAnalysis();
 
     let version = getSelectedVersion();
@@ -405,6 +400,11 @@ function setup() {
     fetch("/api/explanations", { method: "GET", })
         .then(response => response.json())
         .then(exp => { explanations = exp; });
+
+    if (!window.location.pathname.includes("code") && window.localStorage.getItem("seenPrivacyPolicyToast") !== "true") {
+        showToast("toastPrivacyPolicy");
+        window.localStorage.setItem("seenPrivacyPolicyToast", "true");
+    }
 }
 
 document.addEventListener("DOMContentLoaded", setup);
