@@ -298,6 +298,9 @@ function analyze(e) {
     let lintButton = e.currentTarget;
     lintButton.firstElementChild.hidden = false;
 
+    if (!window.location.pathname.includes("code"))
+        showToast("toastPrivacyPolicy");
+
     resetAnalysis();
 
     let version = getSelectedVersion();

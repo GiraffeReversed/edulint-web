@@ -51,6 +51,11 @@ def teachers():
     return render_template("teachers.html")
 
 
+@bp.route("/privacy", methods=["GET"])
+def privacy():
+    return render_template("privacy.html")
+
+
 # rightfully stolen from
 # https://stackoverflow.com/a/14625619
 @bp.route('/robots.txt')
