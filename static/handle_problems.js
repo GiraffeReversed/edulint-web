@@ -298,8 +298,10 @@ function analyze(e) {
     let lintButton = e.currentTarget;
     lintButton.firstElementChild.hidden = false;
 
-    if (!window.location.pathname.includes("code"))
+    if (!window.location.pathname.includes("code") && window.localStorage.getItem("seenPrivacyPolicyToast") !== "true") {
         showToast("toastPrivacyPolicy");
+        window.localStorage.setItem("seenPrivacyPolicyToast", "true");
+    }
 
     resetAnalysis();
 
