@@ -126,9 +126,8 @@ function explanationHTML(problem, explanations) {
     let why = explanations[problem.code]?.why;
     let examples = explanations[problem.code]?.examples;
 
-    return (why ? "<h6>Why is it a problem?</h6>" + why + "<hr>" : "")
-        + (examples ? "<h6>How to solve it?</h6>" + examples + "<hr>" : "")
-        + `<small>${problem.source} ${problem.code}</small>`;
+    return (why ? "<h6>Why is it a problem?</h6>" + why + "<hr class='my-2'>" : "")
+        + (examples ? "<h6>How to solve it?</h6>" + examples + "<hr class='my-2'>" : "");
 }
 
 function oneLineProblemsHTML(oneLineProblems) {
@@ -162,8 +161,10 @@ function oneLineProblemsHTML(oneLineProblems) {
                 </div>
                 <div id="collapse${lineIndex}_${i}" class="accordion-collapse collapse multi-collapse${lineIndex}"
                     aria-labelledby="heading${lineIndex}_${i}" data-bs-parent="#problemsAccordion">
-                    <div class="accordion-body small">
+                    <div class="accordion-body small pt-2">
                         ${explanationHTML(problem, explanations)}
+                        <small class="text-muted tiny-text"><span class="fw-bold">Debug</span> v${getSelectedVersion()} ${problem.source} ${problem.line} ${problem.code}
+                        <span class="text-break">${problem.path.replace(/\.py$/, "").replace(/^[a-z]*\//, "")}</span></small>
                     </div>
                 </div>
             </div>`;
