@@ -77,7 +77,7 @@ html.dark .CodeMirror-scrollbar-filler {
     overflow-y: hidden;
 }
 
-#problems {
+#problems-block {
     overflow-y: auto;
 }
 
