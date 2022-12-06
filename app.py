@@ -36,7 +36,7 @@ def prepare_HTML_explanations():
     HTML_exps = {
         code: {
             key: markdown(
-                exps[code][key]) for key in exps[code]
+                exps[code][key], extensions=["fenced_code", "codehilite"]) for key in exps[code]
         } for code in exps
     }
 

@@ -4,3 +4,4 @@ gunicorn
 gevent
 markdown
 toml
+Pygments
