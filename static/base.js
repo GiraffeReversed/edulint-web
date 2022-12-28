@@ -61,6 +61,7 @@ function baseSetup() {
     document.getElementById("settingsSave").addEventListener("click", saveSettings);
     document.getElementById("settingDarkmode").addEventListener("click", toggleDarkmode);
     highlightActiveNavlink();
+    window.plausible = window.plausible || function () { (window.plausible.q = window.plausible.q || []).push(arguments) }
 }
 
 document.addEventListener("DOMContentLoaded", baseSetup);

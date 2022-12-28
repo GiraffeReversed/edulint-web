@@ -296,6 +296,7 @@ function getSelectedVersion() {
 }
 
 function analyze(e) {
+    plausible('check-button');
     let lintButton = e.currentTarget;
     lintButton.firstElementChild.hidden = false;
 
