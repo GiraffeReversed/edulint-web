@@ -18,7 +18,18 @@ app.secret_key = "super secret key"
 app.register_blueprint(web_bp)
 app.register_blueprint(api_bp)
 
-Talisman(app, content_security_policy=None,
+csp = {
+    'default-src': [
+        "'self'",
+        "data:",
+        "https://cdnjs.cloudflare.com",
+        "https://cdn.jsdelivr.net",
+        "https://plaus.borysek.eu",
+    ],
+}
+csp['style-src'] = csp['default-src'] + ["'unsafe-inline'"]
+
+Talisman(app, content_security_policy=csp,
          strict_transport_security=False, force_https=False)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
 
