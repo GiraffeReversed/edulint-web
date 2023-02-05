@@ -10,6 +10,12 @@ from utils import code_path, problems_path, explanations_path, Version
 bp = Blueprint('api', __name__, url_prefix='/api')
 
 
+@bp.route("/code/<string:code_hash>", methods=["GET"])
+def editor_code(code_hash: str):
+    with open(code_path(current_app.config, code_hash)) as f:
+        return f.read()
+
+
 @bp.route("/upload_code", methods=["POST"])
 def upload_code():
     code = request.get_json()["code"]
