@@ -10,6 +10,13 @@ from utils import code_path, problems_path, explanations_path, Version
 bp = Blueprint('api', __name__, url_prefix='/api')
 
 
+@bp.route("/versions", methods=["GET"])
+def get_versions():
+    versions = current_app.config["VERSIONS"]
+    assert versions
+    return sorted(versions, reverse=True)
+
+
 @bp.route("/code/<string:code_hash>", methods=["GET"])
 def editor_code(code_hash: str):
     if not code_hash.isalnum():
