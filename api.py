@@ -12,6 +12,13 @@ bp = Blueprint('api', __name__, url_prefix='/api')
 
 @bp.route("/code/<string:code_hash>", methods=["GET"])
 def editor_code(code_hash: str):
+    if not code_hash.isalnum():
+        return {"message": "Don't even try"}, 400
+
+    cpath = code_path(current_app.config, code_hash)
+    if not path.exists(cpath):
+        return {"message": "No such file"}, 404
+
     with open(code_path(current_app.config, code_hash)) as f:
         return f.read()
 
