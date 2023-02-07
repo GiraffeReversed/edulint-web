@@ -8,12 +8,16 @@ import json
 from web import bp as web_bp
 from api import bp as api_bp, with_version
 
-from utils import get_latest, explanations_path, Version
+from utils import get_latest, explanations_path, Version, cache, cache_config
 
 
 app = Flask(__name__)
 app.config.from_file("config.toml", load=toml.load)
 app.config["VERSIONS"] = [Version(v) for v in app.config["VERSIONS"]]
+
+app.config.from_mapping(cache_config)
+cache.init_app(app)
+
 app.secret_key = "super secret key"
 app.register_blueprint(web_bp)
 app.register_blueprint(api_bp)

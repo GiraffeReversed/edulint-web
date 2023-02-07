@@ -4,7 +4,7 @@ from hashlib import sha256
 from os import path
 import sys
 
-from utils import code_path, problems_path, explanations_path, Version
+from utils import code_path, problems_path, explanations_path, Version, cache
 
 
 bp = Blueprint('api', __name__, url_prefix='/api')
@@ -116,5 +116,6 @@ def combine(version: str):
 
 
 @bp.route("/explanations", methods=["GET"])
+@cache.cached(timeout=60*60)  # in seconds
 def explanations():
     return send_file(explanations_path(current_app.config))

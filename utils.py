@@ -2,6 +2,7 @@ import os
 from typing import Tuple, Dict, List, Optional
 from dataclasses import dataclass
 import functools
+from flask_caching import Cache
 
 
 @dataclass(init=False, order=True)
@@ -60,3 +61,10 @@ def get_available_versions(versions_raw: List[str]) -> List[Version]:
 
 def get_latest(versions: List[Version]) -> Version:
     return max(versions)
+
+
+cache_config = {
+    "CACHE_TYPE": "SimpleCache",
+    "CACHE_DEFAULT_TIMEOUT": 300
+}
+cache = Cache()

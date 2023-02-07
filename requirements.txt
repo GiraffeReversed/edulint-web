@@ -1,5 +1,6 @@
 flask
 flask-talisman
+flask-caching
 gunicorn
 gevent
 markdown
