@@ -6,3 +6,6 @@ gevent
 markdown
 toml
 Pygments
+requests
+
+# edulint is installed by setup.py
