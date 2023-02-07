@@ -1,8 +1,9 @@
-from flask import Blueprint, redirect, request, flash, send_file, current_app
+from flask import Blueprint, redirect, request, flash, current_app
 import os
 from hashlib import sha256
 from os import path
 import sys
+import json
 
 from utils import code_path, problems_path, explanations_path, Version, cache
 
@@ -118,4 +119,5 @@ def combine(version: str):
 @bp.route("/explanations", methods=["GET"])
 @cache.cached(timeout=60*60)  # in seconds
 def explanations():
-    return send_file(explanations_path(current_app.config))
+    with open(explanations_path(current_app.config)) as f:
+        return json.load(f)
