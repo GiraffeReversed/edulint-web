@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, request, flash, current_app, render_template
+from flask import Blueprint, redirect, request, flash, current_app, render_template, url_for
 import os
 from hashlib import sha256
 from os import path
@@ -12,6 +12,10 @@ bp = Blueprint('api', __name__, url_prefix='/api')
 
 
 @bp.route("", methods=["GET"])
+def redirect_to_real_swagger():
+    return redirect(url_for('api.get_swagger'))
+
+
 @bp.route("/", methods=["GET"])
 def get_swagger():
     return render_template("swagger_index.html")
