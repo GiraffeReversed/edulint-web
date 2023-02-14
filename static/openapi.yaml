@@ -126,7 +126,7 @@ paths:
         "400":
           description: Invalid hash supplied
         "404":
-          description: Code not found
+          description: Code or version not found
   /api/{version}/analyze:
     post:
       tags:
@@ -158,7 +158,7 @@ paths:
         "400":
           description: Invalid hash supplied
         "404":
-          description: Code not found
+          description: Code or version not found
   /editor/{hash}:
     get:
       tags:
