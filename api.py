@@ -40,7 +40,7 @@ def upload_code():
         with open(code_path(current_app.config, code_hash), "w", encoding="utf8") as f:
             f.write(code)
 
-    return {"filename": code_hash}
+    return {"hash": code_hash}
 
 
 def with_version(version: Version, function, *args, **kwargs):
@@ -112,7 +112,7 @@ def analyze(version_raw: str, code_hash: str):
 
 @bp.route("/<string:version>/analyze", methods=["POST"])
 def combine(version: str):
-    code_hash = upload_code()["filename"]
+    code_hash = upload_code()["hash"]
     return analyze(version, code_hash)
 
 
