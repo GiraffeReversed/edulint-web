@@ -33,6 +33,7 @@ csp = {
     ],
 }
 csp['style-src'] = csp['default-src'] + ["'unsafe-inline'"]
+csp['connect-src'] = csp['default-src'] + ["https://edulint.com", "https://edulint.rechtackova.cz"]
 
 Talisman(app, content_security_policy=csp,
          strict_transport_security=False, force_https=False)
