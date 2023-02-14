@@ -36,6 +36,12 @@ def editor_code(code_hash: str):
         return render_template("editor.html", textarea=f.read(), versions=get_versions())
 
 
+@bp.route("/editor/<string:code_hash>", methods=["GET"])
+def editor_hash(code_hash: str):
+    with open(code_path(current_app.config, code_hash)) as f:
+        return render_template("editor.html", textarea=f.read(), versions=get_versions())
+
+
 @bp.route("/about", methods=["GET"])
 def about():
     return render_template("about.html")
