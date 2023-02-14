@@ -31,7 +31,7 @@ def editor_code(code_hash: str):
         return f.read()
 
 
-@bp.route("/upload_code", methods=["POST"])
+@bp.route("/code", methods=["POST"])
 def upload_code():
     code = request.get_json()["code"]
     code_hash = sha256(code.encode("utf8")).hexdigest()
