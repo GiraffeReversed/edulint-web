@@ -92,7 +92,7 @@ def lint(cpath: str) -> str:
     return result_json
 
 
-@bp.route("/<string:version>/analyze/<string:code_hash>", methods=["GET"])
+@bp.route("/<string:version_raw>/analyze/<string:code_hash>", methods=["GET"])
 def analyze(version_raw: str, code_hash: str):
     if not code_hash.isalnum():
         return {"message": "Don't even try"}, 400
