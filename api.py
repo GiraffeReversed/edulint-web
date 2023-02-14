@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, request, flash, current_app
+from flask import Blueprint, redirect, request, flash, current_app, render_template
 import os
 from hashlib import sha256
 from os import path
@@ -9,6 +9,16 @@ from utils import code_path, problems_path, explanations_path, Version, cache
 
 
 bp = Blueprint('api', __name__, url_prefix='/api')
+
+
+@bp.route("/", methods=["GET"])
+def get_swagger():
+    return render_template("swagger_index.html")
+
+
+@bp.route("/openapi.yaml", methods=["GET"])
+def get_swagger_yaml():
+    return current_app.send_static_file("openapi.yaml")
 
 
 @bp.route("/versions", methods=["GET"])

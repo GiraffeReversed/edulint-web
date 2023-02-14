@@ -28,6 +28,7 @@ csp = {
         "data:",
         "https://cdnjs.cloudflare.com",
         "https://cdn.jsdelivr.net",
+        "https://unpkg.com",
         "https://plaus.borysek.eu",
     ],
 }
