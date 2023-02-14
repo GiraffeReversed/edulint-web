@@ -11,6 +11,7 @@ from utils import code_path, problems_path, explanations_path, Version, cache
 bp = Blueprint('api', __name__, url_prefix='/api')
 
 
+@bp.route("", methods=["GET"])
 @bp.route("/", methods=["GET"])
 def get_swagger():
     return render_template("swagger_index.html")
