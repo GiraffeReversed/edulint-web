@@ -16,8 +16,10 @@ services:
     entrypoint: [ "gunicorn", "--bind", "0.0.0.0:5000", "-w", "4", "--worker-class", "sync", "app:app" ]
 
   proxy:
-    build: ./nginx/
+    image: nginx:1.23-alpine
     restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - web
       - api
