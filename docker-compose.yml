@@ -1,26 +1,26 @@
 version: '3'
+
 services:
   web:
-    container_name: edulint_web
     build: .
     restart: unless-stopped
     volumes:
       - ./codes:/app/codes
     entrypoint: [ "gunicorn", "--bind", "0.0.0.0:5000", "-w", "4", "--worker-class", "gevent", "app:app" ]
 
-
   api:
-    container_name: edulint_api
     build: .
     restart: unless-stopped
     volumes:
       - ./codes:/app/codes
     entrypoint: [ "gunicorn", "--bind", "0.0.0.0:5000", "-w", "4", "--worker-class", "sync", "app:app" ]
 
-  nginx:
-    container_name: edulint_proxy
+  proxy:
     build: ./nginx/
     restart: unless-stopped
     depends_on:
+      - web
+      - api
+    links:
       - web
       - api
