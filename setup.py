@@ -3,6 +3,8 @@ import toml
 import subprocess
 import sys
 import os
+from collections import defaultdict
+from typing import Dict, Any, List
 
 from utils import Version
 
@@ -15,13 +17,30 @@ CONFIG = {
     "EXPLANATIONS": "explanations.json",
 }
 
+def _filter_versions(data: Dict[str, Any]) -> List[str]:
+    releases = data["releases"]
+
+    version_ids = [v for v in releases.keys()]
+    included_versions: List[str] = []
+
+    for version_id in version_ids:
+        has_some_builds: bool = bool(len(releases[version_id]))
+        is_yanked: bool = any([x.get('yanked') for x in releases[version_id]])
+        
+        if has_some_builds and not is_yanked:
+            included_versions.append(version_id)
+    
+    return included_versions
+
 
 def get_versions():
     def filter(versions):
         return [v for v in versions if v >= Version("1.0.0")]
 
     edulint_info = requests.get("https://pypi.org/pypi/edulint/json").json()
-    return filter([Version(v) for v in edulint_info["releases"].keys()])
+    version_ids = _filter_versions(edulint_info)
+
+    return filter([Version(v) for v in version_ids])
 
 
 def prepare_config(config, versions):
