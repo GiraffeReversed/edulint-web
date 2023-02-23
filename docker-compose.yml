@@ -21,8 +21,6 @@ services:
     container_name: edulint_proxy
     build: ./nginx/
     restart: unless-stopped
-    ports:
-      - 127.0.0.1:4999:80
     depends_on:
       - web
       - api
