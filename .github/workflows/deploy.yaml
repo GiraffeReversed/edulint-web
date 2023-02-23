@@ -24,6 +24,7 @@ jobs:
           script_stop: true
           script: |
             cd ${{ env.TARGET_FOLDER }}
-            git pull
+            git fetch
+            git reset ${{ github.ref }}
             docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
             echo "Successfully deployed, hooray!"
