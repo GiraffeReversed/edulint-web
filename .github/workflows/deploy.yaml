@@ -1,0 +1,27 @@
+name: Deploy ${{ github.ref }}
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+env:
+  TARGET_FOLDER: "${{ github.ref == 'refs/heads/main' && secrets.SSH_PROD_FOLDER || secrets.SSH_DEV_FOLDER }}"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Commands over SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host:     ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.KEY }}
+          script_stop: true
+          script: |
+            cd ${{ env.TARGET_FOLDER }}
+            git pull
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+            echo "Successfully deployed, hooray!"
