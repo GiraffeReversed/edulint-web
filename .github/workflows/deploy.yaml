@@ -1,4 +1,4 @@
-name: Deploy
+run-name: Deploy @${{ github.ref_name }} branch
 
 on:
   push:
