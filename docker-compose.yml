@@ -2,6 +2,7 @@ version: '3'
 
 services:
   web:
+    image: edulint/edulint-web:latest
     build: .
     restart: unless-stopped
     volumes:
@@ -9,6 +10,7 @@ services:
     entrypoint: [ "gunicorn", "--bind", "0.0.0.0:5000", "-w", "4", "--worker-class", "gevent", "app:app" ]
 
   api:
+    image: edulint/edulint-web:latest
     build: .
     restart: unless-stopped
     volumes:
