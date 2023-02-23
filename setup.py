@@ -3,8 +3,8 @@ import toml
 import subprocess
 import sys
 import os
+from typing import Dict, Any, List, Optional
 from collections import defaultdict
-from typing import Dict, Any, List
 
 from utils import Version
 
@@ -17,30 +17,39 @@ CONFIG = {
     "EXPLANATIONS": "explanations.json",
 }
 
-def _filter_versions(data: Dict[str, Any]) -> List[str]:
+def _fully_released_versions(data: Dict[str, Any]) -> List[Version]:
     releases = data["releases"]
 
     version_ids = [v for v in releases.keys()]
-    included_versions: List[str] = []
+    valid_versions: List[Version] = []
 
     for version_id in version_ids:
         has_some_builds: bool = bool(len(releases[version_id]))
         is_yanked: bool = any([x.get('yanked') for x in releases[version_id]])
-        
-        if has_some_builds and not is_yanked:
-            included_versions.append(version_id)
+        version_parsed: Optional[Version] = Version.parse(version_id)
+
+        if has_some_builds and not is_yanked and version_parsed:
+            valid_versions.append(version_parsed)
     
-    return included_versions
+    return valid_versions
 
 
-def get_versions():
-    def filter(versions):
-        return [v for v in versions if v >= Version("1.0.0")]
+def _only_last_patch_of_each_minor(versions: List[Version]) -> List[Version]:
+    major_minor: Dict[str, Version] = defaultdict(list)
+    for version in versions:
+        major_minor[f"{version.major}.{version.minor}"].append(version)
+    for key in major_minor:
+        major_minor[key].sort(reverse=True)
+    return [major_minor[key][0] for key in major_minor]
 
+
+def get_versions() -> List[Version]:
     edulint_info = requests.get("https://pypi.org/pypi/edulint/json").json()
-    version_ids = _filter_versions(edulint_info)
+    version_ids: List[Version] = _fully_released_versions(edulint_info)
+    version_ids = _only_last_patch_of_each_minor(version_ids)
+    version_ids = [v_id for v_id in version_ids if v_id.major >= 2]
 
-    return filter([Version(v) for v in version_ids])
+    return version_ids
 
 
 def prepare_config(config, versions):
