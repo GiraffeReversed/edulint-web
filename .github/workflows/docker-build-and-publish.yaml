@@ -7,8 +7,17 @@ on:
       - master
       - publish-manual
 
-jobs:
+  workflow_dispatch:
+    inputs:
+      docker_label:
+        description: 'Docker image will be pushed to edulint/edulint-web:<docker_label>'
+        required: true
+        default: 'latest'
 
+env:
+  docker_label: ${{ inputs.docker_label || 'latest' }}
+
+jobs:
   docker-build-and-publish-image:
     # https://github.com/marketplace/actions/build-and-push-docker-images
     # We can skip some of the steps.
@@ -30,4 +39,4 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: edulint/edulint-web:latest
+          tags: edulint/edulint-web:${{ env.docker_label }}
