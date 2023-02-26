@@ -1,5 +1,7 @@
 # edulint-web
 
+[![Docker image](https://img.shields.io/docker/image-size/edulint/edulint-web/latest?label=Docker%20image%20size)](https://hub.docker.com/r/edulint/edulint-web)
+
 ### Quickstart
 
 You can start your own instance of EduLint (including the web interface) using Docker and docker-compose:
