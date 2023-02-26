@@ -140,3 +140,4 @@ analyses/*
 static/explanations.json
 versions/*
 config.toml
+*.swp
