@@ -26,6 +26,6 @@ jobs:
           script: |
             cd ${{ env.TARGET_FOLDER }}
             git fetch
-            git reset origin/${{ github.ref_name }}
+            git reset --hard origin/${{ github.ref_name }}
             docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
             echo "Successfully deployed, hooray!"
