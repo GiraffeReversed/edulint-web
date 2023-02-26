@@ -142,4 +142,7 @@ versions/*
 logs/*
 config.toml
 *.swp
+logs/*
+**/*.log
+
 !**/.gitkeep
