@@ -13,10 +13,12 @@ RUN python3 setup.py
 COPY . .
 
 ENV FLASK_APP app.py
+ENV PYTHONUNBUFFERED TRUE
 CMD [ "gunicorn", \
     "--bind", "0.0.0.0:5000", \
     "--workers", "4", \
     "--worker-class", "sync", \
-    # "--access-logfile", "/app/logs/gunicorn_access.log", \
+    "--access-logfile", "/app/logs/gunicorn_access.log", \
     "--error-logfile", "/app/logs/gunicorn_error.log", \
+    "--capture-output", \
     "app:app" ]
