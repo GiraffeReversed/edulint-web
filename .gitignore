@@ -139,5 +139,7 @@ analyses/*
 # generated files
 static/explanations.json
 versions/*
+logs/*
 config.toml
 *.swp
+!**/.gitkeep

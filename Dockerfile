@@ -13,4 +13,10 @@ RUN python3 setup.py
 COPY . .
 
 ENV FLASK_APP app.py
-CMD [ "gunicorn", "--bind", "0.0.0.0:5000", "-w", "4", "--worker-class", "sync", "app:app" ]
+CMD [ "gunicorn", \
+    "--bind", "0.0.0.0:5000", \
+    "--workers", "4", \
+    "--worker-class", "sync", \
+    # "--access-logfile", "/app/logs/gunicorn_access.log", \
+    "--error-logfile", "/app/logs/gunicorn_error.log", \
+    "app:app" ]

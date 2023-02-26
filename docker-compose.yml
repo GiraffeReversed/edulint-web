@@ -15,7 +15,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./codes:/app/codes
-    entrypoint: [ "gunicorn", "--bind", "0.0.0.0:5000", "-w", "4", "--worker-class", "sync", "app:app" ]
+      - ./logs/flask_api:/app/logs
 
   proxy:
     image: nginx:1.23-alpine
