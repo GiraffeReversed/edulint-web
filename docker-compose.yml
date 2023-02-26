@@ -7,6 +7,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./codes:/app/codes
+      - ./logs/flask_web:/app/logs
     entrypoint: [ "gunicorn", "--bind", "0.0.0.0:5000", "-w", "4", "--worker-class", "gevent", "app:app" ]
 
   api:
