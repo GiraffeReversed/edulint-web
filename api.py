@@ -1,4 +1,5 @@
-from flask import Blueprint, redirect, request, flash, current_app, render_template, url_for
+from flask import Blueprint, redirect, request, flash, current_app, render_template, url_for, jsonify
+import werkzeug
 import os
 from hashlib import sha256
 from os import path
@@ -90,7 +91,10 @@ def lint(cpath: str) -> str:
     import edulint
 
     config = edulint.config.config.get_config(cpath, [])
-    result = edulint.linting.linting.lint_one(cpath, config)
+    try:
+        result = edulint.linting.linting.lint_one(cpath, config)
+    except edulint.linting.linting.LintingTimeout as e:
+        raise werkzeug.exceptions.RequestTimeout(str(e))
 
     result_json = edulint.linting.problem.Problem.schema().dumps(result, indent=2, many=True)
 
@@ -117,7 +121,10 @@ def analyze(version_raw: str, code_hash: str):
         with open(ppath, encoding="utf8") as f:
             return f.read()
 
-    result = with_version(version, lint, cpath)
+    try:
+        result = with_version(version, lint, cpath)
+    except werkzeug.exceptions.RequestTimeout as e:
+        return {"reason": str(e)}, 408
 
     with open(ppath, "w", encoding="utf8") as f:
         f.write(result)
