@@ -93,7 +93,7 @@ def lint(cpath: str) -> str:
     config = edulint.config.config.get_config(cpath, [])
     try:
         result = edulint.linting.linting.lint_one(cpath, config)
-    except edulint.linting.linting.LintingTimeout as e:
+    except TimeoutError as e:
         raise werkzeug.exceptions.RequestTimeout(str(e))
 
     result_json = edulint.linting.problem.Problem.schema().dumps(result, indent=2, many=True)
