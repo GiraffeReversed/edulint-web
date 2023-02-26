@@ -7,8 +7,11 @@ from packaging import version as packaging_version
 from flask_caching import Cache
 
 
-@dataclass(init=False, order=True)
+@dataclass
 class Version(packaging_version.Version):
+    def __init__(self, version: str) -> None:
+        super().__init__(version)
+
     def is_not_full_release(self) -> bool:
         return not(self.is_prerelease or self.is_postrelease or self.is_devrelease)
 
