@@ -1,6 +1,7 @@
 flask>=2.0.3
 flask-talisman
 flask-caching
+flask-cors
 gunicorn>=19.6.0
 gevent
 markdown

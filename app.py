@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_talisman import Talisman
+from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 import toml
 from markdown import markdown
@@ -34,6 +35,8 @@ csp = {
 }
 csp['style-src'] = csp['default-src'] + ["'unsafe-inline'"]
 csp['connect-src'] = csp['default-src'] + ["https://edulint.com", "https://edulint.rechtackova.cz"]
+
+cors = CORS(app)
 
 Talisman(app, content_security_policy=csp,
          strict_transport_security=False, force_https=False)
