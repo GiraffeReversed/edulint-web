@@ -26,7 +26,7 @@ def editor():
 def editor_example_umime():
     return redirect(url_for(
         "web.editor_code",
-        code_hash="c4bc51f7d34f9340c33e0b3b9dcfd12aa8917fe5a11faa5f6385f5bb41be9fcf",
+        code_hash="b1f3db5035eec46312dc7e48864836eb0d01b0cd4d01af64190c0a0d860e00ee",
     ))
 
 

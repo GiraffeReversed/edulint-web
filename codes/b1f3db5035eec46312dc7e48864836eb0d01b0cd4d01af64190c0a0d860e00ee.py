@@ -1,4 +1,4 @@
-# edulint: enhancement python-spec allowed-onechar-names=
+# edulint: enhancement allowed-onechar-names=
 
 def is_a(ch):
     if ch == "a" or ch == "A":
