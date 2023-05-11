@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, request, flash, current_app, render_template, url_for, jsonify
+from flask import Blueprint, redirect, request, flash, current_app, render_template, url_for
 import werkzeug
 import os
 from hashlib import sha256
