@@ -22,8 +22,9 @@ def editor():
     return render_template("editor.html", versions=get_versions())
 
 
+@bp.route("/editor/code/example", methods=["GET"])
 @bp.route("/editor/code/umime_count_a", methods=["GET"])
-def editor_example_umime():
+def editor_example():
     return redirect(url_for(
         "web.editor_code",
         code_hash="b1f3db5035eec46312dc7e48864836eb0d01b0cd4d01af64190c0a0d860e00ee",
