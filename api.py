@@ -90,13 +90,16 @@ def with_version(version: Version, function, *args, **kwargs):
 def lint(cpath: str) -> str:
     import edulint
 
-    config = edulint.config.config.get_config(cpath, [])
+    config = edulint.get_config_one(cpath, [])
+    if config is None:
+        raise werkzeug.exceptions.NotFound("config file not found or could not be parsed")
+
     try:
-        result = edulint.linting.linting.lint_one(cpath, config)
+        result = edulint.lint_one(cpath, config)
     except TimeoutError as e:
         raise werkzeug.exceptions.RequestTimeout(str(e))
 
-    result_json = edulint.linting.problem.Problem.schema().dumps(result, indent=2, many=True)
+    result_json = edulint.Problem.schema().dumps(result, indent=2, many=True)
 
     return result_json
 
@@ -123,6 +126,8 @@ def analyze(version_raw: str, code_hash: str):
 
     try:
         result = with_version(version, lint, cpath)
+    except werkzeug.exceptions.NotFound as e:
+        return {"reason": str(e)}, 404
     except werkzeug.exceptions.RequestTimeout as e:
         return {"reason": str(e)}, 408
 

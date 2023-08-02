@@ -17,6 +17,7 @@ CONFIG = {
     "EXPLANATIONS": "explanations.json",
 }
 
+
 def _fully_released_versions(data: Dict[str, Any]) -> List[Version]:
     releases = data["releases"]
 
@@ -30,7 +31,7 @@ def _fully_released_versions(data: Dict[str, Any]) -> List[Version]:
 
         if has_some_builds and not is_yanked and version_parsed:
             valid_versions.append(version_parsed)
-    
+
     return valid_versions
 
 
@@ -47,7 +48,7 @@ def get_versions() -> List[Version]:
     edulint_info = requests.get("https://pypi.org/pypi/edulint/json").json()
     version_ids: List[Version] = _fully_released_versions(edulint_info)
     version_ids = _only_last_patch_of_each_minor(version_ids)
-    version_ids = [v_id for v_id in version_ids if v_id.major >= 2]
+    version_ids = [v_id for v_id in version_ids if v_id.major >= 3 or (v_id.major == 2 and v_id.minor >= 7)]
 
     return version_ids
 
