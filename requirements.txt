@@ -1,4 +1,4 @@
-flask>=2.0.3,<2.3.0  # 2.3.0 removes before_first_request
+flask>=2.0.3
 flask-talisman
 flask-caching
 flask-cors

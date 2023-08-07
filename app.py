@@ -49,8 +49,7 @@ def get_explanations():
     return get_explanations()
 
 
-@app.before_first_request
-def prepare_HTML_explanations():
+def prepare_HTML_explanations(app):
     exps = with_version(get_latest(app.config["VERSIONS"]), get_explanations)
 
     HTML_exps = {
@@ -62,6 +61,9 @@ def prepare_HTML_explanations():
 
     with open(explanations_path(app.config), "w") as f:
         f.write(json.dumps(HTML_exps))
+
+with app.app_context():
+    prepare_HTML_explanations(app)
 
 
 if __name__ == "__main__":
