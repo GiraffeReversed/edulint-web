@@ -18,6 +18,8 @@
   <script src="/static/base.js"></script>
   <script src="/static/plaus-dynamic-domain.js"></script>
   
+  <link rel="canonical" href="https://edulint.com{{ url_for(request.endpoint, **request.view_args) }}" />
+
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='code_highlighting.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='code_highlighting_dark.css') }}">
