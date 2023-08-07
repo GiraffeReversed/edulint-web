@@ -1,2 +1,6 @@
 /codes/
 /uploaded_files/
+/.git/
+/__pycache__/
+/logs/
+
