@@ -31,7 +31,7 @@ def get_swagger_yaml():
 def get_versions():
     versions = current_app.config["VERSIONS"]
     assert versions
-    return sorted(versions, reverse=True)
+    return sorted(map(str, versions), reverse=True)
 
 
 @bp.route("/code/<string:code_hash>", methods=["GET"])
