@@ -98,6 +98,8 @@ def lint(cpath: str) -> str:
         result = edulint.lint_one(cpath, config)
     except TimeoutError as e:
         raise werkzeug.exceptions.RequestTimeout(str(e))
+    except Exception as e:
+        raise werkzeug.exceptions.InternalServerError(str(e))
 
     result_json = edulint.Problem.schema().dumps(result, indent=2, many=True)
 
