@@ -9,5 +9,6 @@ toml
 Pygments
 requests
 packaging
+loguru
 
 # edulint is installed by setup.py

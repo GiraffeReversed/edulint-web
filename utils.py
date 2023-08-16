@@ -2,6 +2,7 @@ import os
 from typing import Tuple, Dict, List, Optional
 from dataclasses import dataclass
 import functools
+import json
 
 from packaging import version as packaging_version
 from flask_caching import Cache
@@ -66,3 +67,15 @@ cache_config = {
     "CACHE_DEFAULT_TIMEOUT": 300
 }
 cache = Cache()
+
+
+class LogCollector:
+    def __init__(self):
+        self.logs = []
+
+    def __call__(self, log):
+        level, message = log.split("|", 1)
+        self.logs.append({"level": level, "message": message})
+
+    def json_logs(self):
+        return json.dumps(self.logs)

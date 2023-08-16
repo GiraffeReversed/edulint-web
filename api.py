@@ -5,8 +5,9 @@ from hashlib import sha256
 from os import path
 import sys
 import json
+from loguru import logger
 
-from utils import code_path, problems_path, explanations_path, Version, cache
+from utils import code_path, problems_path, explanations_path, Version, cache, LogCollector
 
 
 bp = Blueprint('api', __name__, url_prefix='/api')
@@ -88,11 +89,17 @@ def with_version(version: Version, function, *args, **kwargs):
 
 
 def lint(cpath: str) -> str:
+    log_collector = LogCollector()
+    logger.add(
+        log_collector, level="WARNING", format='{level}|{message}',
+        colorize=False, diagnose=False, filter=lambda record: "config" in record["name"]
+    )
+
     import edulint
 
     config = edulint.get_config_one(cpath, [])
     if config is None:
-        raise werkzeug.exceptions.NotFound("config file not found or could not be parsed")
+        return f'{{"problems" : [], "config_errors": {log_collector.json_logs()}}}'
 
     try:
         result = edulint.lint_one(cpath, config)
@@ -103,7 +110,7 @@ def lint(cpath: str) -> str:
 
     result_json = edulint.Problem.schema().dumps(result, indent=2, many=True)
 
-    return result_json
+    return f'{{"problems" : {result_json}, "config_errors": {log_collector.json_logs()}}}'
 
 
 @bp.route("/<string:version_raw>/analyze/<string:code_hash>", methods=["GET"])
