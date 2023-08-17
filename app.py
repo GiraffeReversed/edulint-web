@@ -3,12 +3,10 @@ from flask_talisman import Talisman
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 import toml
-from markdown import markdown
 import json
+from markdown import markdown
 
-from web import bp as web_bp
 from api import bp as api_bp, with_version
-
 from utils import get_latest, explanations_path, Version, cache, cache_config
 
 
@@ -20,7 +18,6 @@ app.config.from_mapping(cache_config)
 cache.init_app(app)
 
 app.secret_key = "super secret key"
-app.register_blueprint(web_bp)
 app.register_blueprint(api_bp)
 
 csp = {
@@ -61,6 +58,7 @@ def prepare_HTML_explanations(app):
 
     with open(explanations_path(app.config), "w") as f:
         f.write(json.dumps(HTML_exps))
+
 
 with app.app_context():
     prepare_HTML_explanations(app)
