@@ -8,9 +8,27 @@ on:
       - dev
 
   workflow_dispatch:
+  workflow_call:
+    secrets:
+      SSH_HOST:
+        required: true
+      SSH_USERNAME:
+        required: true
+      SSH_KEY:
+        required: true
+      SSH_PROD_FOLDER:
+        required: true
+      SSH_DEV_FOLDER:
+        required: true
+    
+    inputs:
+      BRANCH:
+        type: string
+        required: true
+
 
 env:
-  TARGET_FOLDER: "${{ github.ref == 'refs/heads/main' && secrets.SSH_PROD_FOLDER || secrets.SSH_DEV_FOLDER }}"
+  BRANCH_REF: "${{ inputs.BRANCH || github.ref_name }}"
 
 jobs:
   deploy:
@@ -24,8 +42,8 @@ jobs:
           key:      ${{ secrets.SSH_KEY }}
           script_stop: true
           script: |
-            cd ${{ env.TARGET_FOLDER }}
+            cd ${{ env.BRANCH_REF == 'main' && secrets.SSH_PROD_FOLDER || secrets.SSH_DEV_FOLDER }}
             git fetch
-            git reset --hard origin/${{ github.ref_name }}
+            git reset --hard origin/${{ env.BRANCH_REF }}
             docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
             echo "Successfully deployed, hooray!"
