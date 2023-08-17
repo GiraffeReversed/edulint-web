@@ -2,13 +2,8 @@ version: '3'
 
 services:
   web:
-    image: edulint/edulint-web:latest
-    build: .
+    image: edulint/edulint-web-frontend:latest
     restart: unless-stopped
-    volumes:
-      - ./codes:/app/codes
-      - ./logs/flask_web:/app/logs
-    entrypoint: [ "gunicorn", "--bind", "0.0.0.0:5000", "-w", "4", "--worker-class", "gevent", "app:app" ]
 
   api:
     image: edulint/edulint-web:latest
@@ -17,6 +12,8 @@ services:
     volumes:
       - ./codes:/app/codes
       - ./logs/flask_api:/app/logs
+    # todo: sync is needed due to python path changes from different edulint version
+    # entrypoint: [ "gunicorn", "--bind", "0.0.0.0:5000", "-w", "4", "--worker-class", "sync", "app:app" ]
 
   proxy:
     image: nginx:1.23-alpine

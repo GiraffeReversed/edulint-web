@@ -2,9 +2,12 @@
 
 [![Docker image](https://img.shields.io/docker/image-size/edulint/edulint-web/latest?label=Docker%20image%20size)](https://hub.docker.com/r/edulint/edulint-web)
 
+This repository contains backend (API) of edulint-web and the docker-compose files for easy deployment of all components together.
+
+
 ### Quickstart
 
-You can start your own instance of EduLint (including the web interface) using Docker and docker-compose:
+You can start your own instance of EduLint (including the [web interface](https://github.com/GiraffeReversed/edulint-web-frontend)) using Docker and docker-compose:
 
 ```sh
 git clone https://github.com/GiraffeReversed/edulint-web.git
