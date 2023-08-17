@@ -1,9 +1,2 @@
 User-agent: *
-Allow: /$
-Allow: /static/
-Allow: /editor
-Allow: /about
-Allow: /faq
-Allow: /teachers
-Disallow: /editor/code
 Disallow: /
