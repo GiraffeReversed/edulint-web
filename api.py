@@ -35,6 +35,13 @@ def get_versions():
     return sorted(map(str, versions), reverse=True)
 
 
+@bp.route("/code-example", methods=["GET"])
+@bp.route("/code-example/", methods=["GET"])
+@bp.route("/code-example/umime_count_a", methods=["GET"])
+def editor_code_example():
+    return editor_code(code_hash="b1f3db5035eec46312dc7e48864836eb0d01b0cd4d01af64190c0a0d860e00ee")
+
+
 @bp.route("/code/<string:code_hash>", methods=["GET"])
 def editor_code(code_hash: str):
     if not code_hash.isalnum():
