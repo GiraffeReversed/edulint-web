@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect, url_for
 from flask_talisman import Talisman
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -38,6 +38,11 @@ cors = CORS(app)
 Talisman(app, content_security_policy=csp,
          strict_transport_security=False, force_https=False)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
+
+
+@app.route("/", methods=["GET"])
+def redirect_to_real_swagger():
+    return redirect(url_for('api.get_swagger'))
 
 
 def get_explanations():
