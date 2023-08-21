@@ -5,6 +5,7 @@ from hashlib import sha256
 from os import path
 import sys
 import json
+from pathlib import Path
 from loguru import logger
 
 from utils import code_path, problems_path, explanations_path, Version, cache, LogCollector
@@ -101,6 +102,15 @@ def with_version(version: Version, function, *args, **kwargs):
 
 
 def lint(cpath: str) -> str:
+    def to_json(results: str, log_collector: LogCollector, cpath: str):
+        return (
+            "{"
+            f'"problems": {results},'
+            f'"config_errors": {log_collector.json_logs()},'
+            f'"hash": "{Path(cpath).stem}"'
+            "}"
+        )
+
     log_collector = LogCollector()
     logger.add(
         log_collector, level="WARNING", format='{level}|{message}',
@@ -111,7 +121,7 @@ def lint(cpath: str) -> str:
 
     config = edulint.get_config_one(cpath, [])
     if config is None:
-        return f'{{"problems" : [], "config_errors": {log_collector.json_logs()}}}'
+        return to_json("[]", log_collector, cpath)
 
     try:
         result = edulint.lint_one(cpath, config)
@@ -122,7 +132,7 @@ def lint(cpath: str) -> str:
 
     result_json = edulint.Problem.schema().dumps(result, indent=2, many=True)
 
-    return f'{{"problems" : {result_json}, "config_errors": {log_collector.json_logs()}}}'
+    return to_json(result_json, log_collector, cpath)
 
 
 @bp.route("/<string:version_raw>/analyze/<string:code_hash>", methods=["GET"])
