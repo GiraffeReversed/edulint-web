@@ -2,11 +2,10 @@ version: '3'
 
 services:
   web:
-    image: edulint/edulint-web-frontend:latest
+    image: edulint/edulint-web-frontend:${FRONTEND_TAG:-latest}
     restart: unless-stopped
 
   api:
-    image: edulint/edulint-web:latest
     build: .
     restart: unless-stopped
     volumes:

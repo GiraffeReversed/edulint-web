@@ -45,5 +45,6 @@ jobs:
             cd ${{ env.BRANCH_REF == 'main' && secrets.SSH_PROD_FOLDER || secrets.SSH_DEV_FOLDER }}
             git fetch
             git reset --hard origin/${{ env.BRANCH_REF }}
-            docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+            docker-compose pull
+            FRONTEND_TAG=${{ env.BRANCH_REF == 'main' && 'latest' || 'dev' }} docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
             echo "Successfully deployed, hooray!"
