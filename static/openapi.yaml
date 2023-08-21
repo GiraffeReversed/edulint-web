@@ -122,7 +122,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Problems"
+                $ref: "#/components/schemas/AnalyzeResponse"
         "400":
           description: Invalid hash supplied
         "404":
@@ -154,7 +154,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Problems"
+                $ref: "#/components/schemas/AnalyzeResponse"
         "400":
           description: Invalid hash supplied
         "404":
@@ -232,3 +232,17 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/Problem"
+    ConfigError:
+      type: string
+      example: unrecognized option foo
+    AnalyzeResponse:
+      type: object
+      properties:
+        problems:
+          $ref: "#/components/schemas/Problems"
+        config_errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConfigError"
+        hash:
+          $ref: "#/components/schemas/HashStr"
