@@ -28,6 +28,11 @@ def get_swagger_yaml():
     return current_app.send_static_file("openapi.yaml")
 
 
+@bp.route("/swagger_index.js", methods=["GET"])
+def get_swagger_js():
+    return current_app.send_static_file("swagger_index.js")
+
+
 @bp.route("/versions", methods=["GET"])
 def get_versions():
     versions = current_app.config["VERSIONS"]
