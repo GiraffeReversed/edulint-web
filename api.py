@@ -5,6 +5,7 @@ from hashlib import sha256
 from os import path
 import sys
 import json
+from typing import Optional, List
 from pathlib import Path
 from loguru import logger
 
@@ -36,9 +37,9 @@ def get_swagger_js():
 
 @bp.route("/versions", methods=["GET"])
 def get_versions():
-    versions = current_app.config["VERSIONS"]
+    versions: List[Version] = current_app.config["VERSIONS"]
     assert versions
-    return sorted(map(str, versions), reverse=True)
+    return list(map(str, sorted(versions, reverse=True)))
 
 
 EXAMPLE_ALIASES = {
