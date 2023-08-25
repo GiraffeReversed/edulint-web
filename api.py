@@ -43,7 +43,7 @@ def get_versions():
 
 
 def parse_version(version_raw: str) -> Optional[Version]:
-    version_raw = get_versions[-1] if version_raw == "latest" else version_raw
+    version_raw = get_versions[0] if version_raw == "latest" else version_raw
     return Version.parse(version_raw) # It would be better to move this whole function inside Version but that doesn't have the app context.
 
 EXAMPLE_ALIASES = {

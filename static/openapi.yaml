@@ -45,14 +45,14 @@ paths:
       summary: List of currently supported Edulint versions.
       responses:
         "200":
-          description: Successful operation
+          description: The versions are sorted -- the newest version is listed first.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   type: string
-                example: ["2.9.2","2.10.2"]
+                example: ["2.10.2", "2.9.2"]
 
   /api/code:
     post:
