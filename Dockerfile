@@ -7,6 +7,8 @@ RUN pip3 install -r requirements.txt
 
 COPY utils.py utils.py
 COPY setup.py setup.py
+COPY pypi_helper.py pypi_helper.py
+
 ADD https://pypi.org/pypi/edulint/json /tmp/edulint_versions.json
 RUN python3 setup.py
 
