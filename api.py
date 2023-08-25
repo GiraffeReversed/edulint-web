@@ -42,6 +42,10 @@ def get_versions():
     return list(map(str, sorted(versions, reverse=True)))
 
 
+def parse_version(version_raw: str) -> Optional[Version]:
+    version_raw = get_versions[-1] if version_raw == "latest" else version_raw
+    return Version.parse(version_raw) # It would be better to move this whole function inside Version but that doesn't have the app context.
+
 EXAMPLE_ALIASES = {
     "umime_count_a" : "b1f3db5035eec46312dc7e48864836eb0d01b0cd4d01af64190c0a0d860e00ee"
 }
@@ -141,7 +145,7 @@ def analyze(version_raw: str, code_hash: str):
     if not code_hash.isalnum():
         return {"message": "Don't even try"}, 400
 
-    version = Version.parse(version_raw)
+    version = parse_version(version_raw)
     if version is None or version not in current_app.config["VERSIONS"]:
         return {"message": "Invalid version"}, 404
 
