@@ -1,10 +1,9 @@
-import requests
-import toml
 import subprocess
 import sys
 import os
 from typing import Dict, Any, List, Optional
-from collections import defaultdict
+
+import toml
 
 from utils import Version
 from pypi_helper import get_versions
