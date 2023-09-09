@@ -1,4 +1,4 @@
-# edulint: enhancement allowed-onechar-names=
+# edulint: set-groups=python-specific allowed-onechar-names=
 
 def is_a(ch):
     if ch == "a" or ch == "A":

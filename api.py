@@ -47,7 +47,7 @@ def parse_version(version_raw: str) -> Optional[Version]:
     return Version.parse(version_raw) # It would be better to move this whole function inside Version but that doesn't have the app context.
 
 EXAMPLE_ALIASES = {
-    "umime_count_a" : "b1f3db5035eec46312dc7e48864836eb0d01b0cd4d01af64190c0a0d860e00ee"
+    "umime_count_a" : "a10b77b1feed3225cceb4b765068965ea482abfc618eee849259f7d1401cd09d"  # originally was b1f3db5035eec46312dc7e48864836eb0d01b0cd4d01af64190c0a0d860e00ee
 }
 
 
