@@ -38,6 +38,7 @@ def get_swagger_js():
 @bp.route("/versions", methods=["GET"])
 def get_versions():
     versions: List[Version] = current_app.config["VERSIONS"]
+    versions = [v_id for v_id in versions if v_id.major >= 3] # Hotfix for edulint-web and edulint incompatibility, 2023-09-14, TODO: proper fix
     assert versions
     return list(map(str, sorted(versions, reverse=True)))
 
