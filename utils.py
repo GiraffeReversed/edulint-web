@@ -1,5 +1,5 @@
 import os
-from typing import Tuple, Dict, List, Optional
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 import functools
 import json
@@ -14,7 +14,7 @@ class Version(packaging_version.Version):
         super().__init__(version)
 
     def is_not_full_release(self) -> bool:
-        return not(self.is_prerelease or self.is_postrelease or self.is_devrelease)
+        return not (self.is_prerelease or self.is_postrelease or self.is_devrelease)
 
     def name(self) -> str:
         return str(self).replace(".", "_")
@@ -62,10 +62,7 @@ def get_latest(versions: List[Version]) -> Version:
     return max(versions)
 
 
-cache_config = {
-    "CACHE_TYPE": "SimpleCache",
-    "CACHE_DEFAULT_TIMEOUT": 300
-}
+cache_config = {"CACHE_TYPE": "SimpleCache", "CACHE_DEFAULT_TIMEOUT": 300}
 cache = Cache()
 
 

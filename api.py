@@ -12,12 +12,12 @@ from loguru import logger
 from utils import code_path, problems_path, explanations_path, Version, cache, LogCollector
 
 
-bp = Blueprint('api', __name__, url_prefix='/api')
+bp = Blueprint("api", __name__, url_prefix="/api")
 
 
 @bp.route("", methods=["GET"])
 def redirect_to_real_swagger():
-    return redirect(url_for('api.get_swagger'))
+    return redirect(url_for("api.get_swagger"))
 
 
 @bp.route("/", methods=["GET"])
@@ -38,18 +38,19 @@ def get_swagger_js():
 @bp.route("/versions", methods=["GET"])
 def get_versions():
     versions: List[Version] = current_app.config["VERSIONS"]
-    versions = [v_id for v_id in versions if v_id.major >= 3] # Hotfix for edulint-web and edulint incompatibility, 2023-09-14, TODO: proper fix
+    # Hotfix for edulint-web and edulint incompatibility, 2023-09-14, TODO: proper fix
+    versions = [v_id for v_id in versions if v_id.major >= 3]
     assert versions
     return list(map(str, sorted(versions, reverse=True)))
 
 
+# It would be better to move this whole function inside Version but that doesn't have the app context.
 def parse_version(version_raw: str) -> Optional[Version]:
     version_raw = get_versions()[0] if version_raw == "latest" else version_raw
-    return Version.parse(version_raw) # It would be better to move this whole function inside Version but that doesn't have the app context.
+    return Version.parse(version_raw)
 
-EXAMPLE_ALIASES = {
-    "umime_count_a" : "a10b77b1feed3225cceb4b765068965ea482abfc618eee849259f7d1401cd09d"  # originally was b1f3db5035eec46312dc7e48864836eb0d01b0cd4d01af64190c0a0d860e00ee
-}
+
+EXAMPLE_ALIASES = {"umime_count_a": "a10b77b1feed3225cceb4b765068965ea482abfc618eee849259f7d1401cd09d"}
 
 
 @bp.route("/code/<string:code_name>", methods=["GET"])
@@ -81,9 +82,7 @@ def upload_code():
 
 def with_version(version: Version, function, *args, **kwargs):
     linter_dir = os.path.join(
-        os.getcwd(),
-        current_app.config["VERSIONS_FOLDER"],
-        version.dir(current_app.config["LINTER_FOLDER_PREFIX"])
+        os.getcwd(), current_app.config["VERSIONS_FOLDER"], version.dir(current_app.config["LINTER_FOLDER_PREFIX"])
     )
 
     original_sys_path = sys.path[:]
@@ -119,8 +118,12 @@ def lint(cpath: str) -> str:
 
     log_collector = LogCollector()
     logger.add(
-        log_collector, level="WARNING", format='{level}|{message}',
-        colorize=False, diagnose=False, filter=lambda record: "config" in record["name"]
+        log_collector,
+        level="WARNING",
+        format="{level}|{message}",
+        colorize=False,
+        diagnose=False,
+        filter=lambda record: "config" in record["name"],
     )
 
     import edulint
@@ -154,7 +157,7 @@ def analyze(version_raw: str, code_hash: str):
     ppath = problems_path(current_app.config, code_hash, version)
 
     if not path.exists(cpath):
-        flash('No such file uploaded')
+        flash("No such file uploaded")
         return redirect("/editor", code=302)
 
     if path.exists(ppath):
@@ -181,7 +184,7 @@ def combine(version: str):
 
 
 @bp.route("/explanations", methods=["GET"])
-@cache.cached(timeout=60*60)  # in seconds
+@cache.cached(timeout=60 * 60)  # in seconds
 def explanations():
     with open(explanations_path(current_app.config)) as f:
         return json.load(f)

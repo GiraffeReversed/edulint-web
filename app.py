@@ -21,7 +21,7 @@ app.secret_key = "super secret key"
 app.register_blueprint(api_bp)
 
 csp = {
-    'default-src': [
+    "default-src": [
         "'self'",
         "data:",
         "https://cdnjs.cloudflare.com",
@@ -30,19 +30,18 @@ csp = {
         "https://plaus.borysek.eu",
     ],
 }
-csp['style-src'] = csp['default-src'] + ["'unsafe-inline'"]
-csp['connect-src'] = csp['default-src'] + ["https://edulint.com", "https://edulint.rechtackova.cz"]
+csp["style-src"] = csp["default-src"] + ["'unsafe-inline'"]
+csp["connect-src"] = csp["default-src"] + ["https://edulint.com", "https://edulint.rechtackova.cz"]
 
 cors = CORS(app)
 
-Talisman(app, content_security_policy=csp,
-         strict_transport_security=False, force_https=False)
+Talisman(app, content_security_policy=csp, strict_transport_security=False, force_https=False)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
 
 
 @app.route("/", methods=["GET"])
 def redirect_to_real_swagger():
-    return redirect(url_for('api.get_swagger'))
+    return redirect(url_for("api.get_swagger"))
 
 
 def get_explanations():
@@ -55,10 +54,8 @@ def prepare_HTML_explanations(app):
     exps = with_version(get_latest(app.config["VERSIONS"]), get_explanations)
 
     HTML_exps = {
-        code: {
-            key: markdown(
-                exps[code][key], extensions=["fenced_code", "codehilite"]) for key in exps[code]
-        } for code in exps
+        code: {key: markdown(exps[code][key], extensions=["fenced_code", "codehilite"]) for key in exps[code]}
+        for code in exps
     }
 
     with open(explanations_path(app.config), "w") as f:
