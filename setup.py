@@ -14,6 +14,8 @@ CONFIG = {
     "VERSIONS_FOLDER": "versions",
     "LINTER_FOLDER_PREFIX": "edulint",
     "EXPLANATIONS": "explanations.json",
+    "DATABASE_FOLDER": "databases",
+    "DATABASE": "db.db",
 }
 
 

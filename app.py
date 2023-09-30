@@ -6,8 +6,8 @@ import toml
 import json
 from markdown import markdown
 
-from api import bp as api_bp, with_version
-from utils import get_latest, explanations_path, Version, cache, cache_config
+from api import bp as api_bp, get_explanations
+from utils import explanations_path, Version, cache, cache_config
 
 
 app = Flask(__name__)
@@ -44,14 +44,8 @@ def redirect_to_real_swagger():
     return redirect(url_for("api.get_swagger"))
 
 
-def get_explanations():
-    from edulint.explanations import get_explanations
-
-    return get_explanations()
-
-
 def prepare_HTML_explanations(app):
-    exps = with_version(get_latest(app.config["VERSIONS"]), get_explanations)
+    exps = get_explanations()
 
     HTML_exps = {
         code: {key: markdown(exps[code][key], extensions=["fenced_code", "codehilite"]) for key in exps[code]}

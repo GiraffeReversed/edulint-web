@@ -8,8 +8,10 @@ import json
 from typing import Optional, List
 from pathlib import Path
 from loguru import logger
+import time
 
-from utils import code_path, problems_path, explanations_path, Version, cache, LogCollector
+from utils import code_path, problems_path, explanations_path, Version, cache, LogCollector, get_latest
+from database_management import store_feedback_in_db
 
 
 bp = Blueprint("api", __name__, url_prefix="/api")
@@ -183,8 +185,42 @@ def combine(version: str):
     return analyze(version, code_hash)
 
 
+def get_explanations():
+    def get_explanations_import():
+        from edulint.explanations import get_explanations
+
+        return get_explanations()
+
+    return with_version(get_latest(current_app.config["VERSIONS"]), get_explanations_import)
+
+
 @bp.route("/explanations", methods=["GET"])
 @cache.cached(timeout=60 * 60)  # in seconds
 def explanations():
     with open(explanations_path(current_app.config)) as f:
         return json.load(f)
+
+
+def get_explanations_hash(explanations):
+    return sha256(json.dumps(sorted(explanations.items())).encode("utf8")).hexdigest()
+
+
+@bp.route("/explanations/feedback", methods=["POST"])
+def give_explanations_feedback():
+    json = request.get_json()
+    explanations = get_explanations()
+
+    feedback = {"time": int(time.time()), "explanations_hash": get_explanations_hash(explanations)}
+    for key in ("defect_code", "good", "comment", "source_code", "source_code_hash", "line", "user_id"):
+        feedback[key] = json.get(key)
+
+    if feedback["defect_code"] is None or (feedback["good"] is None and feedback["comment"] is None):
+        return {"message": "Malformed feedback data"}, 400
+
+    explanation = explanations.get(feedback["defect_code"])
+    feedback["explanation"] = json.dumps(explanation) if explanation is not None else None
+
+    feedback["extra"] = "{}"
+
+    store_feedback_in_db(feedback)
+    return {"message": "OK"}, 200

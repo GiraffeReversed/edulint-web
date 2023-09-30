@@ -140,6 +140,7 @@ analyses/*
 # generated files
 static/explanations.json
 versions/*
+databases/*
 logs/*
 config.toml
 *.swp
