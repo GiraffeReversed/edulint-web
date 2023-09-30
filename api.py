@@ -207,12 +207,12 @@ def get_explanations_hash(explanations):
 
 @bp.route("/explanations/feedback", methods=["POST"])
 def give_explanations_feedback():
-    json = request.get_json()
+    json_request = request.get_json()
     explanations = get_explanations()
 
     feedback = {"time": int(time.time()), "explanations_hash": get_explanations_hash(explanations)}
     for key in ("defect_code", "good", "comment", "source_code", "source_code_hash", "line", "user_id"):
-        feedback[key] = json.get(key)
+        feedback[key] = json_request.get(key)
 
     if feedback["defect_code"] is None or (feedback["good"] is None and feedback["comment"] is None):
         return {"message": "Malformed feedback data"}, 400

@@ -65,4 +65,4 @@ def store_feedback_in_db(db, feedback: Dict[str, str]):
         f"VALUES({', '.join(':' + key for key in sorted_keys)})",
         feedback,
     )
-    cursor.commit()
+    db.commit()
