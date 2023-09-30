@@ -43,12 +43,12 @@ def get_versions():
     # Hotfix for edulint-web and edulint incompatibility, 2023-09-14, TODO: proper fix
     versions = [v_id for v_id in versions if v_id.major >= 3]
     assert versions
-    return list(map(str, sorted(versions, reverse=True)))
+    return ["latest"] + list(map(str, sorted(versions, reverse=True))) # ["latest", "3.2.1", ...]
 
 
 # It would be better to move this whole function inside Version but that doesn't have the app context.
 def parse_version(version_raw: str) -> Optional[Version]:
-    version_raw = get_versions()[0] if version_raw == "latest" else version_raw
+    version_raw = get_versions()[1] if version_raw == "latest" else version_raw
     return Version.parse(version_raw)
 
 
