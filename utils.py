@@ -36,7 +36,9 @@ class Version(packaging_version.Version):
             return None
 
 
-def full_path(upload_folder: str, filename: str, version: Optional[Version] = None) -> str:
+def full_path(
+    upload_folder: str, filename: str, version: Optional[Version] = None
+) -> str:
     version_name = f"_{version.name()}" if version is not None else ""
     return os.path.join(upload_folder, f"{filename}{version_name}")
 

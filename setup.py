@@ -29,8 +29,13 @@ def prepare_config(config, versions: List[Version]):
 
 def prepare_packages(config, version: Version):
     for version in versions:
-        version_folder = os.path.join(config["VERSIONS_FOLDER"], f"{config['LINTER_FOLDER_PREFIX']}_{version.name()}")
-        subprocess.check_call(f"{sys.executable} -m pip install edulint=={version} --target={version_folder}".split())
+        version_folder = os.path.join(
+            config["VERSIONS_FOLDER"],
+            f"{config['LINTER_FOLDER_PREFIX']}_{version.name()}",
+        )
+        subprocess.check_call(
+            f"{sys.executable} -m pip install edulint=={version} --target={version_folder}".split()
+        )
 
 
 if __name__ == "__main__":

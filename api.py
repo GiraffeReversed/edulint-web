@@ -1,4 +1,12 @@
-from flask import Blueprint, redirect, request, flash, current_app, render_template, url_for
+from flask import (
+    Blueprint,
+    redirect,
+    request,
+    flash,
+    current_app,
+    render_template,
+    url_for,
+)
 import werkzeug
 import os
 from hashlib import sha256
@@ -10,7 +18,15 @@ from pathlib import Path
 from loguru import logger
 import time
 
-from utils import code_path, problems_path, explanations_path, Version, cache, LogCollector, get_latest
+from utils import (
+    code_path,
+    problems_path,
+    explanations_path,
+    Version,
+    cache,
+    LogCollector,
+    get_latest,
+)
 from database_management import store_feedback_in_db
 
 
@@ -43,7 +59,9 @@ def get_versions():
     # Hotfix for edulint-web and edulint incompatibility, 2023-09-14, TODO: proper fix
     versions = [v_id for v_id in versions if v_id.major >= 3]
     assert versions
-    return ["latest"] + list(map(str, sorted(versions, reverse=True))) # ["latest", "3.2.1", ...]
+    return ["latest"] + list(
+        map(str, sorted(versions, reverse=True))
+    )  # ["latest", "3.2.1", ...]
 
 
 # It would be better to move this whole function inside Version but that doesn't have the app context.
@@ -52,7 +70,9 @@ def parse_version(version_raw: str) -> Optional[Version]:
     return Version.parse(version_raw)
 
 
-EXAMPLE_ALIASES = {"umime_count_a": "a10b77b1feed3225cceb4b765068965ea482abfc618eee849259f7d1401cd09d"}
+EXAMPLE_ALIASES = {
+    "umime_count_a": "a10b77b1feed3225cceb4b765068965ea482abfc618eee849259f7d1401cd09d"
+}
 
 
 @bp.route("/code/<string:code_name>", methods=["GET"])
@@ -84,14 +104,18 @@ def upload_code():
 
 def with_version(version: Version, function, *args, **kwargs):
     linter_dir = os.path.join(
-        os.getcwd(), current_app.config["VERSIONS_FOLDER"], version.dir(current_app.config["LINTER_FOLDER_PREFIX"])
+        os.getcwd(),
+        current_app.config["VERSIONS_FOLDER"],
+        version.dir(current_app.config["LINTER_FOLDER_PREFIX"]),
     )
 
     original_sys_path = sys.path[:]
     sys.path.insert(0, linter_dir)
 
     original_pypath = os.environ.get("PYTHONPATH")
-    os.environ["PYTHONPATH"] = linter_dir + (f":{original_pypath}" if original_pypath else "")
+    os.environ["PYTHONPATH"] = linter_dir + (
+        f":{original_pypath}" if original_pypath else ""
+    )
 
     result = function(*args, **kwargs)
 
@@ -191,7 +215,9 @@ def get_explanations():
 
         return get_explanations()
 
-    return with_version(get_latest(current_app.config["VERSIONS"]), get_explanations_import)
+    return with_version(
+        get_latest(current_app.config["VERSIONS"]), get_explanations_import
+    )
 
 
 @bp.route("/explanations", methods=["GET"])
@@ -210,15 +236,30 @@ def give_explanations_feedback():
     json_request = request.get_json()
     explanations = get_explanations()
 
-    feedback = {"time": int(time.time()), "explanations_hash": get_explanations_hash(explanations)}
-    for key in ("defect_code", "good", "comment", "source_code", "source_code_hash", "line", "user_id"):
+    feedback = {
+        "time": int(time.time()),
+        "explanations_hash": get_explanations_hash(explanations),
+    }
+    for key in (
+        "defect_code",
+        "good",
+        "comment",
+        "source_code",
+        "source_code_hash",
+        "line",
+        "user_id",
+    ):
         feedback[key] = json_request.get(key)
 
-    if feedback["defect_code"] is None or (feedback["good"] is None and feedback["comment"] is None):
+    if feedback["defect_code"] is None or (
+        feedback["good"] is None and feedback["comment"] is None
+    ):
         return {"message": "Malformed feedback data"}, 400
 
     explanation = explanations.get(feedback["defect_code"])
-    feedback["explanation"] = json.dumps(explanation) if explanation is not None else None
+    feedback["explanation"] = (
+        json.dumps(explanation) if explanation is not None else None
+    )
 
     feedback["extra"] = "{}"
 
