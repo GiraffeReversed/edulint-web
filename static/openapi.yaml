@@ -222,7 +222,7 @@ components:
       example: print('Hello world')
     HashStr:
       type: string
-      example: c4bc51f7d34f9340c33e0b3b9dcfd12aa8917fe5a11faa5f6385f5bb41be9fcf
+      example: a10b77b1feed3225cceb4b765068965ea482abfc618eee849259f7d1401cd09d
     Hash:
       type: object
       properties:
@@ -233,7 +233,7 @@ components:
       properties:
         path:
           type: string
-          example: codes/c4bc51f7d34f9340c33e0b3b9dcfd12aa8917fe5a11faa5f6385f5bb41be9fcf.py
+          example: codes/a10b77b1feed3225cceb4b765068965ea482abfc618eee849259f7d1401cd09d.py
         source:
           type: string
           example: pylint
