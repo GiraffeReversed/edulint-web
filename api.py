@@ -17,6 +17,8 @@ from typing import Optional, List
 from pathlib import Path
 from loguru import logger
 import time
+import urllib
+import shlex
 
 from utils import (
     code_path,
@@ -132,7 +134,7 @@ def with_version(version: Version, function, *args, **kwargs):
     return result
 
 
-def lint(cpath: str) -> str:
+def lint(cpath: str, url_config: str) -> str:
     def to_json(results: str, log_collector: LogCollector, cpath: str):
         return (
             "{"
@@ -154,7 +156,7 @@ def lint(cpath: str) -> str:
 
     import edulint
 
-    config = edulint.get_config_one(cpath, [])
+    config = edulint.get_config_one(cpath, shlex.split(url_config))
     if config is None:
         return to_json("[]", log_collector, cpath)
 
@@ -179,8 +181,10 @@ def analyze(version_raw: str, code_hash: str):
     if version is None or version not in current_app.config["VERSIONS"]:
         return {"message": "Invalid version"}, 404
 
+    url_config = urllib.parse.unquote(request.args.get("config", default=""))
+
     cpath = code_path(current_app.config, code_hash)
-    ppath = problems_path(current_app.config, code_hash, version)
+    ppath = problems_path(current_app.config, code_hash, version, url_config)
 
     if not path.exists(cpath):
         flash("No such file uploaded")
@@ -189,9 +193,8 @@ def analyze(version_raw: str, code_hash: str):
     if path.exists(ppath):
         with open(ppath, encoding="utf8") as f:
             return f.read()
-
     try:
-        result = with_version(version, lint, cpath)
+        result = with_version(version, lint, cpath, url_config)
     except werkzeug.exceptions.NotFound as e:
         return {"reason": str(e)}, 404
     except werkzeug.exceptions.RequestTimeout as e:

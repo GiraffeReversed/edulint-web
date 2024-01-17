@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass
 import functools
 import json
+import hashlib
 
 from packaging import version as packaging_version
 from flask_caching import Cache
@@ -47,8 +48,12 @@ def code_path(config: Dict[str, str], code_hash: str) -> str:
     return full_path(config["CODE_FOLDER"], code_hash) + ".py"
 
 
-def problems_path(config: Dict[str, str], code_hash: str, version: Version) -> str:
-    return full_path(config["ANALYSIS_FOLDER"], code_hash, version) + ".json"
+def problems_path(
+    config: Dict[str, str], code_hash: str, version: Version, url_config: str
+) -> str:
+    path = full_path(config["ANALYSIS_FOLDER"], code_hash, version)
+    config_hash = hashlib.sha256(url_config.encode("utf8")).hexdigest()[:10]
+    return f"{path}_{config_hash}.json"
 
 
 def explanations_path(config: Dict[str, str]) -> str:
