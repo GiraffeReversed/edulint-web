@@ -84,6 +84,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Hash"
+        "400":
+          description: Missing parameter with uploaded code
       # security:
       # - petstore_auth:
       #   - write:pets

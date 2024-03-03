@@ -94,14 +94,19 @@ def editor_code(code_name: str):
 
 @bp.route("/code", methods=["POST"])
 def upload_code():
-    code = request.get_json()["code"]
+    request_json = request.get_json()
+    code = request_json.get("code")
+
+    if code is None:
+        return {"message": "No code to upload"}, 400
+
     code_hash = sha256(code.encode("utf8")).hexdigest()
 
     if not path.exists(code_path(current_app.config, code_hash)):
         with open(code_path(current_app.config, code_hash), "w", encoding="utf8") as f:
             f.write(code)
 
-    return {"hash": code_hash}
+    return {"hash": code_hash}, 200
 
 
 def with_version(version: Version, function, *args, **kwargs):
@@ -208,8 +213,10 @@ def analyze(version_raw: str, code_hash: str):
 
 @bp.route("/<string:version>/analyze", methods=["POST"])
 def combine(version: str):
-    code_hash = upload_code()["hash"]
-    return analyze(version, code_hash)
+    res, code = upload_code()
+    if code != 200:
+        return res, code
+    return analyze(version, res["hash"])
 
 
 def get_explanations():
