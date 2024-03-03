@@ -5,6 +5,7 @@ from typing import Dict
 from flask import current_app, g
 
 EXPLANATIONS_FEEDBACK_TABLE = "explanations_table"
+SOURCE_ID_MAPPING_TABLE = "source_id_mapping"
 
 
 def get_db_path():
@@ -35,6 +36,14 @@ def prepare_db():
             )"""
     )
 
+    cur.execute(
+        f"""CREATE TABLE IF NOT EXISTS {SOURCE_ID_MAPPING_TABLE}(
+            mapping_id INTEGER PRIMARY KEY,
+            time INTEGER NOT NULL,
+            source_id TEXT,
+            source_code_hash TEXT
+        )"""
+    )
 
 
 def get_db():
@@ -70,5 +79,15 @@ def store_feedback_in_db(db, feedback: Dict[str, str]):
         f"INSERT INTO {EXPLANATIONS_FEEDBACK_TABLE}({', '.join(sorted_keys)}) "
         f"VALUES({', '.join(':' + key for key in sorted_keys)})",
         feedback,
+    )
+    db.commit()
+
+
+@with_db
+def store_source_id_in_mapping(db, source_id: str, time: int, code_hash: str):
+    cursor = db.cursor()
+    cursor.execute(
+        f"INSERT INTO {SOURCE_ID_MAPPING_TABLE}(time, source_id, source_code_hash)  VALUES(?, ?, ?)",
+        (time, source_id, code_hash),
     )
     db.commit()

@@ -29,7 +29,7 @@ from utils import (
     LogCollector,
     get_latest,
 )
-from database_management import store_feedback_in_db
+from database_management import store_feedback_in_db, store_source_id_in_mapping
 
 
 bp = Blueprint("api", __name__, url_prefix="/api")
@@ -101,10 +101,14 @@ def upload_code():
         return {"message": "No code to upload"}, 400
 
     code_hash = sha256(code.encode("utf8")).hexdigest()
+    source_id = request_json.get("source_id")
 
     if not path.exists(code_path(current_app.config, code_hash)):
         with open(code_path(current_app.config, code_hash), "w", encoding="utf8") as f:
             f.write(code)
+
+    if source_id is not None:
+        store_source_id_in_mapping(source_id, int(time.time()), code_hash)
 
     return {"hash": code_hash}, 200
 
