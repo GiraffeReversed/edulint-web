@@ -8,34 +8,40 @@ EXPLANATIONS_FEEDBACK_TABLE = "explanations_table"
 
 
 def get_db_path():
-    return os.path.join(current_app.config["DATABASE_FOLDER"], current_app.config["DATABASE"])
+    return os.path.join(
+        current_app.config["DATABASE_FOLDER"], current_app.config["DATABASE"]
+    )
+
+
+def prepare_db():
+    db_path = get_db_path()
+    db = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
+
+    cur = db.cursor()
+    cur.execute(
+        f"""CREATE TABLE IF NOT EXISTS {EXPLANATIONS_FEEDBACK_TABLE}(
+                explanation_id INTEGER PRIMARY KEY,
+                time INTEGER NOT NULL,
+                defect_code TEXT NOT NULL,
+                good INTEGER,
+                comment TEXT,
+                source_code TEXT,
+                source_code_hash TEXT,
+                line INTEGER,
+                explanations_hash TEXT,
+                explanation TEXT,
+                user_id TEXT,
+                extra TEXT
+            )"""
+    )
+
 
 
 def get_db():
     db_path = get_db_path()
-    db_existed = os.path.exists(db_path)
 
     if "db" not in g:
-        g.db = sqlite3.connect(get_db_path(), detect_types=sqlite3.PARSE_DECLTYPES)
-
-    if not db_existed:
-        cur = g.db.cursor()
-        cur.execute(
-            f"""CREATE TABLE {EXPLANATIONS_FEEDBACK_TABLE}(
-                    explanation_id INTEGER PRIMARY KEY,
-                    time INTEGER NOT NULL,
-                    defect_code TEXT NOT NULL,
-                    good INTEGER,
-                    comment TEXT,
-                    source_code TEXT,
-                    source_code_hash TEXT,
-                    line INTEGER,
-                    explanations_hash TEXT,
-                    explanation TEXT,
-                    user_id TEXT,
-                    extra TEXT
-                )"""
-        )
+        g.db = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
 
     return g.db
 

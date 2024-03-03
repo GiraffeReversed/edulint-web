@@ -8,6 +8,7 @@ from markdown import markdown
 
 from api import bp as api_bp, get_explanations
 from utils import explanations_path, Version, cache, cache_config
+from database_management import prepare_db
 
 
 app = Flask(__name__)
@@ -58,6 +59,7 @@ def prepare_HTML_explanations(app):
 
 with app.app_context():
     prepare_HTML_explanations(app)
+    prepare_db()
 
 
 if __name__ == "__main__":
