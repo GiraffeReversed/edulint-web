@@ -190,6 +190,13 @@ def analyze(version_raw: str, code_hash: str):
     if version is None or version not in current_app.config["VERSIONS"]:
         return {"message": "Invalid version"}, 404
 
+    use_cached_result_raw = urllib.parse.unquote(
+        request.args.get("use-cached-result", default="true")
+    ).lower()
+    if use_cached_result_raw not in ("true", "false"):
+        return {"message": "Invalid value for use-cached-result"}, 400
+    use_cached_result = use_cached_result_raw == "true"
+
     url_config = urllib.parse.unquote(request.args.get("config", default=""))
 
     cpath = code_path(current_app.config, code_hash)
@@ -199,7 +206,7 @@ def analyze(version_raw: str, code_hash: str):
         flash("No such file uploaded")
         return redirect("/editor", code=302)
 
-    if path.exists(ppath):
+    if path.exists(ppath) and use_cached_result:
         with open(ppath, encoding="utf8") as f:
             return f.read()
     try:
