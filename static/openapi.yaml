@@ -145,6 +145,12 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/QueryConfig"
+        - name: use-cached-result
+          in: query
+          description: enables/disables using cached linting results
+          required: false
+          schema:
+            $ref: "#/components/schemas/TrueBoolean"
       responses:
         "200":
           description: successful operation
@@ -176,6 +182,12 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/QueryConfig"
+        - name: use-cached-result
+          in: query
+          description: enables/disables using cached linting results
+          required: false
+          schema:
+            $ref: "#/components/schemas/TrueBoolean"
       requestBody:
         description: the code to upload and analyze
         content:
@@ -288,3 +300,7 @@ components:
     QueryConfig:
       type: string
       example: config-file=cs0
+    TrueBoolean:
+      type: boolean
+      enum: [true, false]
+      default: true
