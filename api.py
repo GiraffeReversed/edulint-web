@@ -2,7 +2,6 @@ from flask import (
     Blueprint,
     redirect,
     request,
-    flash,
     current_app,
     render_template,
     url_for,
@@ -203,8 +202,7 @@ def analyze(version_raw: str, code_hash: str):
     ppath = problems_path(current_app.config, code_hash, version, url_config)
 
     if not path.exists(cpath):
-        flash("No such file uploaded")
-        return redirect("/editor", code=302)
+        return {"message": "No such file"}, 404
 
     if path.exists(ppath) and use_cached_result:
         with open(ppath, encoding="utf8") as f:
