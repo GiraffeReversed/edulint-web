@@ -1,6 +1,7 @@
 from flask import (
     Blueprint,
     redirect,
+    Response,
     request,
     current_app,
     render_template,
@@ -206,7 +207,7 @@ def analyze(version_raw: str, code_hash: str):
 
     if path.exists(ppath) and use_cached_result:
         with open(ppath, encoding="utf8") as f:
-            return f.read()
+            return Response(response=f.read(), status=200, mimetype="application/json")
     try:
         result = with_version(version, lint, cpath, url_config)
     except werkzeug.exceptions.NotFound as e:
@@ -217,7 +218,7 @@ def analyze(version_raw: str, code_hash: str):
     with open(ppath, "w", encoding="utf8") as f:
         f.write(result)
 
-    return result
+    return Response(response=result, status=200, mimetype="application/json")
 
 
 @bp.route("/<string:version>/analyze", methods=["POST"])
