@@ -49,10 +49,11 @@ def code_path(config: Dict[str, str], code_hash: str) -> str:
 
 
 def problems_path(
-    config: Dict[str, str], code_hash: str, version: Version, url_config: str
+    app_config: Dict[str, str], code_hash: str, version: Version, edulint_config
 ) -> str:
-    path = full_path(config["ANALYSIS_FOLDER"], code_hash, version)
-    config_hash = hashlib.sha256(url_config.encode("utf8")).hexdigest()[:10]
+    path = full_path(app_config["ANALYSIS_FOLDER"], code_hash, version)
+    config_str = json.dumps(edulint_config, sort_keys=True, default=lambda o: str(o))
+    config_hash = hashlib.sha256(config_str.encode("utf8")).hexdigest()[:10]
     return f"{path}_{config_hash}.json"
 
 

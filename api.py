@@ -128,22 +128,21 @@ def with_version(version: Version, function, *args, **kwargs):
         f":{original_pypath}" if original_pypath else ""
     )
 
-    result = function(*args, **kwargs)
+    try:
+        return function(*args, **kwargs)
+    finally:
+        sys.path = original_sys_path
+        if original_pypath is None:
+            os.environ.pop("PYTHONPATH")
+        else:
+            os.environ["PYTHONPATH"] = original_pypath
 
-    sys.path = original_sys_path
-    if original_pypath is None:
-        os.environ.pop("PYTHONPATH")
-    else:
-        os.environ["PYTHONPATH"] = original_pypath
-
-    for module in sys.modules.copy():
-        if any(m in module for m in ["edulint", "pylint", "flake8"]):
-            sys.modules.pop(module)
-
-    return result
+        for module in sys.modules.copy():
+            if any(m in module for m in ["edulint", "pylint", "flake8"]):
+                sys.modules.pop(module)
 
 
-def lint(cpath: str, url_config: str) -> str:
+def lint(version: Version, code_hash: str, url_config: str) -> str:
     def to_json(results: str, log_collector: LogCollector, cpath: str):
         return (
             "{"
@@ -153,15 +152,31 @@ def lint(cpath: str, url_config: str) -> str:
             "}"
         )
 
-    log_collector = LogCollector()
-    logger.add(
-        log_collector,
-        level="WARNING",
-        format="{level}|{message}",
-        colorize=False,
-        diagnose=False,
-        filter=lambda record: "config" in record["name"],
-    )
+    def get_use_cached_result():
+        use_cached_result_raw = urllib.parse.unquote(
+            request.args.get("use-cached-result", default="true")
+        ).lower()
+        if use_cached_result_raw not in ("true", "false"):
+            raise werkzeug.exceptions.BadRequest("Invalid value for use-cached-result")
+        return use_cached_result_raw == "true"
+
+    def setup_log_collector():
+        log_collector = LogCollector()
+        logger.add(
+            log_collector,
+            level="WARNING",
+            format="{level}|{message}",
+            colorize=False,
+            diagnose=False,
+            filter=lambda record: "config" in record["name"],
+        )
+        return log_collector
+
+    cpath = code_path(current_app.config, code_hash)
+    if not path.exists(cpath):
+        raise werkzeug.exceptions.NotFound(f"No file with hash {code_hash} uploaded")
+
+    log_collector = setup_log_collector()
 
     import edulint
 
@@ -169,16 +184,24 @@ def lint(cpath: str, url_config: str) -> str:
     if config is None:
         return to_json("[]", log_collector, cpath)
 
+    ppath = problems_path(current_app.config, code_hash, version, config)
+    if path.exists(ppath) and get_use_cached_result():
+        with open(ppath, encoding="utf8") as f:
+            return f.read()
+
     try:
-        result = edulint.lint_one(cpath, config)
+        problems = edulint.lint_one(cpath, config)
     except TimeoutError as e:
         raise werkzeug.exceptions.RequestTimeout(str(e))
     except Exception as e:
         raise werkzeug.exceptions.InternalServerError(str(e))
 
-    result_json = edulint.Problem.schema().dumps(result, indent=2, many=True)
+    problems_json = edulint.Problem.schema().dumps(problems, indent=2, many=True)
+    result = to_json(problems_json, log_collector, cpath)
 
-    return to_json(result_json, log_collector, cpath)
+    with open(ppath, "w", encoding="utf8") as f:
+        f.write(result)
+    return result
 
 
 @bp.route("/<string:version_raw>/analyze/<string:code_hash>", methods=["GET"])
@@ -190,33 +213,18 @@ def analyze(version_raw: str, code_hash: str):
     if version is None or version not in current_app.config["VERSIONS"]:
         return {"message": "Invalid version"}, 404
 
-    use_cached_result_raw = urllib.parse.unquote(
-        request.args.get("use-cached-result", default="true")
-    ).lower()
-    if use_cached_result_raw not in ("true", "false"):
-        return {"message": "Invalid value for use-cached-result"}, 400
-    use_cached_result = use_cached_result_raw == "true"
-
     url_config = urllib.parse.unquote(request.args.get("config", default=""))
 
-    cpath = code_path(current_app.config, code_hash)
-    ppath = problems_path(current_app.config, code_hash, version, url_config)
-
-    if not path.exists(cpath):
-        return {"message": "No such file"}, 404
-
-    if path.exists(ppath) and use_cached_result:
-        with open(ppath, encoding="utf8") as f:
-            return Response(response=f.read(), status=200, mimetype="application/json")
     try:
-        result = with_version(version, lint, cpath, url_config)
+        result = with_version(version, lint, version, code_hash, url_config)
+    except werkzeug.exceptions.BadRequest as e:
+        return {"message": str(e)}, 400
     except werkzeug.exceptions.NotFound as e:
-        return {"reason": str(e)}, 404
+        return {"message": str(e)}, 404
     except werkzeug.exceptions.RequestTimeout as e:
-        return {"reason": str(e)}, 408
-
-    with open(ppath, "w", encoding="utf8") as f:
-        f.write(result)
+        return {"message": str(e)}, 408
+    except werkzeug.exceptions.InternalServerError as e:
+        return {"message": str(e)}, 500
 
     return Response(response=result, status=200, mimetype="application/json")
 
