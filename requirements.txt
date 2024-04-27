@@ -1,14 +1,16 @@
-flask>=2.0.3
-flask-talisman
-flask-caching
-flask-cors
+# Most dependencies are pinned to major versions to help with long-term stability. Upgrades to new major versions will require manual verification.
+
+flask>=2.0.3,<4.0.0  # >2.0.3 was due to some neccesary functionality. 3.x is supported, fixing to <4.x so that we don't get caught of guard. 
+flask-talisman~=1.1
+flask-caching~=2.1
+flask-cors~=4.0
 gunicorn>=19.6.0
 gevent
-markdown
-toml
-Pygments
-requests
+markdown~=3.6
+toml~=0.10
+Pygments~=2.17
+requests>=2.31.0 # fix min version due to CVE
 packaging
-loguru
+loguru~=0.7
 
 # edulint is installed by setup.py
