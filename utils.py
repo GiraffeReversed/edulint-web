@@ -84,3 +84,14 @@ class LogCollector:
 
     def json_logs(self):
         return json.dumps(self.logs)
+
+# Copied from distutils.util.strtobool, which is deprecated
+# Slightly modified to return True/False instead of 1 and 0    
+def strtobool (val: str) -> bool:
+    val = val.lower()
+    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+        return True
+    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+        return False
+    else:
+        raise ValueError("invalid truth value %r" % (val,))

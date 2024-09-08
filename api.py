@@ -28,6 +28,7 @@ from utils import (
     cache,
     LogCollector,
     get_latest,
+    strtobool,
 )
 from database_management import store_feedback_in_db, store_source_id_in_mapping
 
@@ -293,3 +294,39 @@ def give_explanations_feedback():
 
     store_feedback_in_db(feedback)
     return {"message": "OK"}, 200
+
+@bp.route("/thonny", methods=["POST"])
+def thonny():
+    content = request.json
+    message_type = content.get('type')
+    session_id = content.get('session_id', 'thonny:ID_MISSING').split(":")
+    # _ = session_id[0] # static "thonny" prefix
+    machine_id = session_id[1] # should be present (or ID_FAILURE or ID_MISSING)
+    user_id    = session_id[2] if len(session_id) > 2 else "NO_USER_ID"
+    file_id    = session_id[3] if len(session_id) > 3 else "NO_FILE_ID"
+    # session_id_str = f"thonny:{machine_id}:{user_id}:{file_id}"
+
+    if message_type == "thonny-annoucement-request":
+        return {"text": ""}  # Non-empty string would get shown on every startup of Thonny with Thonny-EduLint
+
+    if message_type == "thonny-settings":
+        return {
+            "force_disable_code_remote_reporting": strtobool(os.environ.get('THONNY_DISABLE_CODE_REMOTE_REPORTING', 'True')),
+            "force_disable_result_remote_reporting": strtobool(os.environ.get('THONNY_DISABLE_RESULT_REMOTE_REPORTING', 'True')),
+            "force_disable_exception_remote_reporting": strtobool(os.environ.get('THONNY_DISABLE_EXCEPTION_REMOTE_REPORTING', 'True')),
+            "enable_first_time_reporting_dialog": strtobool(os.environ.get('THONNY_ENABLE_FIRST_TIME_REPORTING_DIALOG', 'False')),
+        }
+
+    if message_type == 'result':
+        results: str = content['results']
+        return {"error_msg": "Persistance for this data is not yet implemented."}, 501
+
+    if message_type == 'error':
+        errors: str = content['errors']
+        return {"error_msg": "Persistance for this data is not yet implemented."}, 501
+
+    if message_type == 'code':
+        code: str = content['code']
+        return {"error_msg": "Persistance for this data is not yet implemented."}, 501
+
+    return {"error_msg": "Unknown message type."}, 400
