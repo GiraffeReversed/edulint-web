@@ -40,8 +40,7 @@ def prepare_packages(config, version: Version):
 
 if __name__ == "__main__":
     versions = get_versions("edulint")
-    versions = [v_id for v_id in versions if v_id.major >= 3]
-    versions = [v_id for v_id in versions if not (v_id.major == 3 and v_id.minor in (5, 6))]  # 3.5.x and 3.6.x didn't work with the API server, so let's not include them
+    versions = [v_id for v_id in versions if v_id.major >= 4]
 
     prepare_packages(CONFIG, versions)
     prepare_config(CONFIG, versions)
