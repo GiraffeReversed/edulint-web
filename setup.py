@@ -41,6 +41,7 @@ def prepare_packages(config, version: Version):
 if __name__ == "__main__":
     versions = get_versions("edulint")
     versions = [v_id for v_id in versions if v_id.major >= 4]
+    versions = [versions[-1]]  # The public web instance will only support the latest EduLint version.
 
     prepare_packages(CONFIG, versions)
     prepare_config(CONFIG, versions)
