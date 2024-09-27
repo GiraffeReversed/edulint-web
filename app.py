@@ -1,9 +1,11 @@
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, request
 from flask_talisman import Talisman
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 import toml
 import json
+import os
+import tracemalloc
 from markdown import markdown
 
 from api import bp as api_bp, get_explanations
@@ -39,6 +41,25 @@ cors = CORS(app)
 Talisman(app, content_security_policy=csp, strict_transport_security=False, force_https=False)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
 
+memory_snapshot = None
+
+@app.route("/api/memory_debug", methods=["GET"])
+def memory_test(): 
+    if os.environ.get("MEMORY_DEBUG_PASSWORD", None) is None:
+        return "No password for memory debugging, the endpoint is disabled", 500 
+    if request.args.get('password', None) is None:
+        return "Suply the password in query argument `password`", 401
+    if os.environ["MEMORY_DEBUG_PASSWORD"] != request.args['password']:
+        return "Incorrect memory debug password", 401 
+
+    global memory_snapshot 
+    tracemalloc.start() 
+    if not memory_snapshot: 
+        memory_snapshot = tracemalloc.take_snapshot()  # Take a snapshot of the current memory usage 
+    else: 
+        top_stats = tracemalloc.take_snapshot().compare_to(memory_snapshot, "lineno") 
+        return "\n".join([str(x) for x in top_stats[:100]]), 200
+    return "intial snapshot taken", "200"
 
 @app.route("/", methods=["GET"])
 def redirect_to_real_swagger():
