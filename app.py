@@ -4,11 +4,11 @@ from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 import toml
 import json
-import os
-import tracemalloc
+
 from markdown import markdown
 
 from api import bp as api_bp, get_explanations
+# from memory_debug import bp as memory_bp
 from utils import explanations_path, cache, cache_config
 from database_management import prepare_db
 
@@ -21,6 +21,7 @@ cache.init_app(app)
 
 app.secret_key = "super secret key"
 app.register_blueprint(api_bp)
+# app.register_blueprint(memory_bp)
 
 csp = {
     "default-src": [
@@ -44,29 +45,6 @@ Talisman(
     app, content_security_policy=csp, strict_transport_security=False, force_https=False
 )
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
-
-memory_snapshot = None
-
-
-@app.route("/api/memory_debug", methods=["GET"])
-def memory_test():
-    if os.environ.get("MEMORY_DEBUG_PASSWORD", None) is None:
-        return "No password for memory debugging, the endpoint is disabled", 500
-    if request.args.get("password", None) is None:
-        return "Suply the password in query argument `password`", 401
-    if os.environ["MEMORY_DEBUG_PASSWORD"] != request.args["password"]:
-        return "Incorrect memory debug password", 401
-
-    global memory_snapshot
-    tracemalloc.start()
-    if not memory_snapshot:
-        memory_snapshot = (
-            tracemalloc.take_snapshot()
-        )  # Take a snapshot of the current memory usage
-    else:
-        top_stats = tracemalloc.take_snapshot().compare_to(memory_snapshot, "lineno")
-        return "\n".join([str(x) for x in top_stats[:100]]), 200
-    return "intial snapshot taken", "200"
 
 
 @app.route("/", methods=["GET"])
