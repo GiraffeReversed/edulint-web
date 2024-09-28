@@ -9,13 +9,12 @@ import tracemalloc
 from markdown import markdown
 
 from api import bp as api_bp, get_explanations
-from utils import explanations_path, Version, cache, cache_config
+from utils import explanations_path, cache, cache_config
 from database_management import prepare_db
 
 
 app = Flask(__name__)
 app.config.from_file("config.toml", load=toml.load)
-app.config["VERSIONS"] = [Version(v) for v in app.config["VERSIONS"]]
 
 app.config.from_mapping(cache_config)
 cache.init_app(app)
@@ -34,32 +33,41 @@ csp = {
     ],
 }
 csp["style-src"] = csp["default-src"] + ["'unsafe-inline'"]
-csp["connect-src"] = csp["default-src"] + ["https://edulint.com", "https://edulint.rechtackova.cz"]
+csp["connect-src"] = csp["default-src"] + [
+    "https://edulint.com",
+    "https://edulint.rechtackova.cz",
+]
 
 cors = CORS(app)
 
-Talisman(app, content_security_policy=csp, strict_transport_security=False, force_https=False)
+Talisman(
+    app, content_security_policy=csp, strict_transport_security=False, force_https=False
+)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1)
 
 memory_snapshot = None
 
-@app.route("/api/memory_debug", methods=["GET"])
-def memory_test(): 
-    if os.environ.get("MEMORY_DEBUG_PASSWORD", None) is None:
-        return "No password for memory debugging, the endpoint is disabled", 500 
-    if request.args.get('password', None) is None:
-        return "Suply the password in query argument `password`", 401
-    if os.environ["MEMORY_DEBUG_PASSWORD"] != request.args['password']:
-        return "Incorrect memory debug password", 401 
 
-    global memory_snapshot 
-    tracemalloc.start() 
-    if not memory_snapshot: 
-        memory_snapshot = tracemalloc.take_snapshot()  # Take a snapshot of the current memory usage 
-    else: 
-        top_stats = tracemalloc.take_snapshot().compare_to(memory_snapshot, "lineno") 
+@app.route("/api/memory_debug", methods=["GET"])
+def memory_test():
+    if os.environ.get("MEMORY_DEBUG_PASSWORD", None) is None:
+        return "No password for memory debugging, the endpoint is disabled", 500
+    if request.args.get("password", None) is None:
+        return "Suply the password in query argument `password`", 401
+    if os.environ["MEMORY_DEBUG_PASSWORD"] != request.args["password"]:
+        return "Incorrect memory debug password", 401
+
+    global memory_snapshot
+    tracemalloc.start()
+    if not memory_snapshot:
+        memory_snapshot = (
+            tracemalloc.take_snapshot()
+        )  # Take a snapshot of the current memory usage
+    else:
+        top_stats = tracemalloc.take_snapshot().compare_to(memory_snapshot, "lineno")
         return "\n".join([str(x) for x in top_stats[:100]]), 200
     return "intial snapshot taken", "200"
+
 
 @app.route("/", methods=["GET"])
 def redirect_to_real_swagger():
@@ -70,7 +78,10 @@ def prepare_HTML_explanations(app):
     exps = get_explanations()
 
     HTML_exps = {
-        code: {key: markdown(exps[code][key], extensions=["fenced_code", "codehilite"]) for key in exps[code]}
+        code: {
+            key: markdown(exps[code][key], extensions=["fenced_code", "codehilite"])
+            for key in exps[code]
+        }
         for code in exps
     }
 

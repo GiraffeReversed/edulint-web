@@ -12,8 +12,6 @@ services:
       - ./codes:/app/codes
       - ./databases:/app/databases
       - ./logs/flask_api:/app/logs
-    # todo: sync is needed due to python path changes from different edulint version
-    # entrypoint: [ "gunicorn", "--bind", "0.0.0.0:5000", "-w", "4", "--worker-class", "sync", "app:app" ]
 
   proxy:
     image: nginx:1.23-alpine

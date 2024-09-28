@@ -37,21 +37,16 @@ class Version(packaging_version.Version):
             return None
 
 
-def full_path(
-    upload_folder: str, filename: str, version: Optional[Version] = None
-) -> str:
-    version_name = f"_{version.name()}" if version is not None else ""
-    return os.path.join(upload_folder, f"{filename}{version_name}")
+def full_path(upload_folder: str, filename: str) -> str:
+    return os.path.join(upload_folder, filename)
 
 
 def code_path(config: Dict[str, str], code_hash: str) -> str:
     return full_path(config["CODE_FOLDER"], code_hash) + ".py"
 
 
-def problems_path(
-    app_config: Dict[str, str], code_hash: str, version: Version, edulint_config
-) -> str:
-    path = full_path(app_config["ANALYSIS_FOLDER"], code_hash, version)
+def problems_path(app_config: Dict[str, str], code_hash: str, edulint_config) -> str:
+    path = full_path(app_config["ANALYSIS_FOLDER"], code_hash)
     config_str = json.dumps(edulint_config, sort_keys=True, default=lambda o: str(o))
     config_hash = hashlib.sha256(config_str.encode("utf8")).hexdigest()[:10]
     return f"{path}_{config_hash}.json"
@@ -85,13 +80,14 @@ class LogCollector:
     def json_logs(self):
         return json.dumps(self.logs)
 
+
 # Copied from distutils.util.strtobool, which is deprecated
-# Slightly modified to return True/False instead of 1 and 0    
-def strtobool (val: str) -> bool:
+# Slightly modified to return True/False instead of 1 and 0
+def strtobool(val: str) -> bool:
     val = val.lower()
-    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+    if val in ("y", "yes", "t", "true", "on", "1"):
         return True
-    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+    elif val in ("n", "no", "f", "false", "off", "0"):
         return False
     else:
         raise ValueError("invalid truth value %r" % (val,))

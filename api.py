@@ -11,27 +11,24 @@ import werkzeug
 import os
 from hashlib import sha256
 from os import path
-import sys
 import json
-from typing import Optional, List
 from pathlib import Path
 from loguru import logger
 import time
 import urllib
 import shlex
 
+import edulint
+
 from utils import (
     code_path,
     problems_path,
     explanations_path,
-    Version,
     cache,
     LogCollector,
-    get_latest,
     strtobool,
 )
 from database_management import store_feedback_in_db, store_source_id_in_mapping
-
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -56,24 +53,10 @@ def get_swagger_js():
     return current_app.send_static_file("swagger_index.js")
 
 
-def get_versions_raw():
-    versions: List[Version] = current_app.config["VERSIONS"]
-    versions = [v_id for v_id in versions if v_id.major >= 4]  # Current compatibility requirement
-    assert versions
-    return list(
-       map(str, sorted(versions, reverse=True))
-    )  # ["3.2.1", ...]
-
-
 @bp.route("/versions", methods=["GET"])
 def get_versions_endpoint():
-    # The public web instance only supports the latest EduLint version 
+    # The public web instance only supports the latest EduLint version
     return ["latest"]
-
-# It would be better to move this whole function inside Version but that doesn't have the app context.
-def parse_version(version_raw: str) -> Optional[Version]:
-    version_raw = get_versions_raw()[0] if version_raw == "latest" else version_raw
-    return Version.parse(version_raw)
 
 
 EXAMPLE_ALIASES = {
@@ -117,36 +100,7 @@ def upload_code():
     return {"hash": code_hash}, 200
 
 
-def with_version(version: Version, function, *args, **kwargs):
-    linter_dir = os.path.join(
-        os.getcwd(),
-        current_app.config["VERSIONS_FOLDER"],
-        version.dir(current_app.config["LINTER_FOLDER_PREFIX"]),
-    )
-
-    original_sys_path = sys.path[:]
-    sys.path.insert(0, linter_dir)
-
-    original_pypath = os.environ.get("PYTHONPATH")
-    os.environ["PYTHONPATH"] = linter_dir + (
-        f":{original_pypath}" if original_pypath else ""
-    )
-
-    try:
-        return function(*args, **kwargs)
-    finally:
-        sys.path = original_sys_path
-        if original_pypath is None:
-            os.environ.pop("PYTHONPATH")
-        else:
-            os.environ["PYTHONPATH"] = original_pypath
-
-        for module in sys.modules.copy():
-            if any(m in module for m in ["edulint", "pylint", "flake8"]):
-                sys.modules.pop(module)
-
-
-def lint(version: Version, code_hash: str, url_config: str) -> str:
+def lint(code_hash: str, url_config: str) -> str:
     def to_json(results: str, log_collector: LogCollector, cpath: str):
         return (
             "{"
@@ -182,13 +136,11 @@ def lint(version: Version, code_hash: str, url_config: str) -> str:
 
     log_collector = setup_log_collector()
 
-    import edulint
-
     config = edulint.get_config_one(cpath, shlex.split(url_config))
     if config is None:
         return to_json("[]", log_collector, cpath)
 
-    ppath = problems_path(current_app.config, code_hash, version, config)
+    ppath = problems_path(current_app.config, code_hash, config)
     if path.exists(ppath) and get_use_cached_result():
         with open(ppath, encoding="utf8") as f:
             return f.read()
@@ -213,14 +165,10 @@ def analyze(version_raw: str, code_hash: str):
     if not code_hash.isalnum():
         return {"message": "Don't even try"}, 400
 
-    version = parse_version(version_raw)
-    if version is None or version not in current_app.config["VERSIONS"]:
-        return {"message": "Invalid version"}, 404
-
     url_config = urllib.parse.unquote(request.args.get("config", default=""))
 
     try:
-        result = with_version(version, lint, version, code_hash, url_config)
+        result = lint(code_hash, url_config)
     except werkzeug.exceptions.BadRequest as e:
         return {"message": str(e)}, 400
     except werkzeug.exceptions.NotFound as e:
@@ -242,14 +190,7 @@ def combine(version: str):
 
 
 def get_explanations():
-    def get_explanations_import():
-        from edulint.explanations import get_explanations
-
-        return get_explanations()
-
-    return with_version(
-        get_latest(current_app.config["VERSIONS"]), get_explanations_import
-    )
+    return edulint.explanations.get_explanations()
 
 
 @bp.route("/explanations", methods=["GET"])
@@ -298,38 +239,49 @@ def give_explanations_feedback():
     store_feedback_in_db(feedback)
     return {"message": "OK"}, 200
 
+
 @bp.route("/thonny", methods=["POST"])
 def thonny():
     content = request.json
-    message_type = content.get('type')
-    session_id = content.get('session_id', 'thonny:ID_MISSING').split(":")
+    message_type = content.get("type")
+    session_id = content.get("session_id", "thonny:ID_MISSING").split(":")
     # _ = session_id[0] # static "thonny" prefix
-    machine_id = session_id[1] # should be present (or ID_FAILURE or ID_MISSING)
-    user_id    = session_id[2] if len(session_id) > 2 else "NO_USER_ID"
-    file_id    = session_id[3] if len(session_id) > 3 else "NO_FILE_ID"
+    machine_id = session_id[1]  # should be present (or ID_FAILURE or ID_MISSING)
+    user_id = session_id[2] if len(session_id) > 2 else "NO_USER_ID"
+    file_id = session_id[3] if len(session_id) > 3 else "NO_FILE_ID"
     # session_id_str = f"thonny:{machine_id}:{user_id}:{file_id}"
 
     if message_type == "thonny-annoucement-request":
-        return {"text": ""}  # Non-empty string would get shown on every startup of Thonny with Thonny-EduLint
+        return {
+            "text": ""
+        }  # Non-empty string would get shown on every startup of Thonny with Thonny-EduLint
 
     if message_type == "thonny-settings":
         return {
-            "force_disable_code_remote_reporting": strtobool(os.environ.get('THONNY_DISABLE_CODE_REMOTE_REPORTING', 'True')),
-            "force_disable_result_remote_reporting": strtobool(os.environ.get('THONNY_DISABLE_RESULT_REMOTE_REPORTING', 'True')),
-            "force_disable_exception_remote_reporting": strtobool(os.environ.get('THONNY_DISABLE_EXCEPTION_REMOTE_REPORTING', 'True')),
-            "enable_first_time_reporting_dialog": strtobool(os.environ.get('THONNY_ENABLE_FIRST_TIME_REPORTING_DIALOG', 'False')),
+            "force_disable_code_remote_reporting": strtobool(
+                os.environ.get("THONNY_DISABLE_CODE_REMOTE_REPORTING", "True")
+            ),
+            "force_disable_result_remote_reporting": strtobool(
+                os.environ.get("THONNY_DISABLE_RESULT_REMOTE_REPORTING", "True")
+            ),
+            "force_disable_exception_remote_reporting": strtobool(
+                os.environ.get("THONNY_DISABLE_EXCEPTION_REMOTE_REPORTING", "True")
+            ),
+            "enable_first_time_reporting_dialog": strtobool(
+                os.environ.get("THONNY_ENABLE_FIRST_TIME_REPORTING_DIALOG", "False")
+            ),
         }
 
-    if message_type == 'result':
-        results: str = content['results']
+    if message_type == "result":
+        results: str = content["results"]
         return {"error_msg": "Persistance for this data is not yet implemented."}, 501
 
-    if message_type == 'error':
-        errors: str = content['errors']
+    if message_type == "error":
+        errors: str = content["errors"]
         return {"error_msg": "Persistance for this data is not yet implemented."}, 501
 
-    if message_type == 'code':
-        code: str = content['code']
+    if message_type == "code":
+        code: str = content["code"]
         return {"error_msg": "Persistance for this data is not yet implemented."}, 501
 
     return {"error_msg": "Unknown message type."}, 400
