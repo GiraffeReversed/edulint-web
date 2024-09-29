@@ -10,8 +10,6 @@ on:
   workflow_dispatch:
   workflow_call:
     secrets:
-      SSH_HOST:
-        required: true
       SSH_USERNAME:
         required: true
       SSH_KEY:
@@ -33,11 +31,16 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ssh-host: ${{ fromJSON( (inputs.BRANCH || github.ref_name) == 'main' && '["contabo1","contabo2"]' || '["contabo1"]' ) }}
+      fail-fast: true
+      max-parallel: 1
     steps:
     - name: Commands over SSH
       uses: appleboy/ssh-action@v1.0.3
       with:
-        host: ${{ secrets.SSH_HOST }}
+        host: ${{ matrix.ssh-host }}.ip.borysek.eu
         username: ${{ secrets.SSH_USERNAME }}
         key: ${{ secrets.SSH_KEY }}
         script_stop: true
