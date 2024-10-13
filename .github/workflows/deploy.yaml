@@ -4,8 +4,8 @@ run-name: Deploy @${{ github.ref_name }} branch
 on:
   push:
     branches:
-      - main
-      - dev
+    - main
+    - dev
 
   workflow_dispatch:
   workflow_call:
@@ -20,7 +20,7 @@ on:
         required: true
       SSH_DEV_FOLDER:
         required: true
-    
+
     inputs:
       BRANCH:
         type: string
@@ -34,17 +34,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Commands over SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host:     ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key:      ${{ secrets.SSH_KEY }}
-          script_stop: true
-          script: |
-            cd ${{ env.BRANCH_REF == 'main' && secrets.SSH_PROD_FOLDER || secrets.SSH_DEV_FOLDER }}
-            git fetch
-            git reset --hard origin/${{ env.BRANCH_REF }}
-            FRONTEND_TAG=${{ env.BRANCH_REF == 'main' && 'latest' || 'dev' }} docker compose pull
-            FRONTEND_TAG=${{ env.BRANCH_REF == 'main' && 'latest' || 'dev' }} docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-            echo "Successfully deployed, hooray!"
+    - name: Commands over SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script_stop: true
+        script: |
+          cd ${{ env.BRANCH_REF == 'main' && secrets.SSH_PROD_FOLDER || secrets.SSH_DEV_FOLDER }}
+          git fetch
+          git reset --hard origin/${{ env.BRANCH_REF }}
+          FRONTEND_TAG=${{ env.BRANCH_REF == 'main' && 'latest' || 'dev' }} docker compose pull
+          FRONTEND_TAG=${{ env.BRANCH_REF == 'main' && 'latest' || 'dev' }} docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+          echo "Successfully deployed, hooray!"
