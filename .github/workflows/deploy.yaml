@@ -43,8 +43,8 @@ jobs:
         host: ${{ matrix.ssh-host }}.ip.borysek.eu
         username: ${{ secrets.SSH_USERNAME }}
         key: ${{ secrets.SSH_KEY }}
-        script_stop: true
         script: |
+          set -e
           cd ${{ env.BRANCH_REF == 'main' && secrets.SSH_PROD_FOLDER || secrets.SSH_DEV_FOLDER }}
           git fetch
           git reset --hard origin/${{ env.BRANCH_REF }}
