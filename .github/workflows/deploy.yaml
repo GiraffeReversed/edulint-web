@@ -38,7 +38,7 @@ jobs:
       max-parallel: 1
     steps:
     - name: Commands over SSH
-      uses: appleboy/ssh-action@v1.0.3
+      uses: appleboy/ssh-action@v1.2.4
       with:
         host: ${{ matrix.ssh-host }}.ip.borysek.eu
         username: ${{ secrets.SSH_USERNAME }}
