@@ -1,5 +1,4 @@
-FROM python:3.11-slim-bookworm
-# We can upgrade to 3.12 once we drop EduLint 3.x
+FROM python:3.14-slim-trixie
 
 WORKDIR /app
 
