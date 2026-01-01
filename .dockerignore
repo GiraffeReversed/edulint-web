@@ -1,6 +1,8 @@
+/analysis/*.json
 /codes/
 /uploaded_files/
 /.git/
+/.github/
 /__pycache__/
 /logs/
 
